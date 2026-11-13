@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RoboTwin 集中渲染实验报告 · 2026-11-13</title>
+<style>
+:root{
+  --paper:#F7F4EE;--card:#FFFFFF;--ink:#1C1B18;--ink2:#3B3832;--muted:#70695F;--line:#E4DED3;--line2:#CEC6B8;
+  --p1:#B0451E;--p1-soft:#F5E5DC;--p2:#14706A;--p2-soft:#DDEEEA;--p3:#3B4C9E;--p3-soft:#E2E5F4;
+  --gold:#A87A22;--gold-soft:#F3EAD6;--accent:var(--ink);--soft:#EEEAE2;
+  --sans:"Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",Georgia,serif;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,ui-monospace,monospace;
+}
+[data-part="1"]{--accent:var(--p1);--soft:var(--p1-soft)}
+[data-part="2"]{--accent:var(--p2);--soft:var(--p2-soft)}
+[data-part="3"]{--accent:var(--p3);--soft:var(--p3-soft)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2{font-family:var(--serif);font-weight:700;letter-spacing:-.015em;margin:0 0 22px}
+h1{font-size:58px;line-height:1.25}h2{font-size:40px;line-height:1.3}h3{font-size:23px;line-height:1.4;margin:0 0 10px}
+p,li{font-size:21px;line-height:1.65;color:var(--ink2)}p{margin:0 0 16px}ul{margin:0;padding-left:1.15em}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:4px}a:hover{text-decoration-thickness:2px}
+button{font:inherit;cursor:pointer;color:inherit}button:disabled{cursor:default;opacity:.4}
+button,a,summary{touch-action:manipulation}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:5px}
+.deck{position:relative;max-width:1160px;margin:auto}
+.slide{padding:80px 56px;scroll-margin-top:90px;border-bottom:1px solid var(--line)}
+.kicker,.label{font:600 14px/1.5 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}.kicker{margin-bottom:14px}.label{display:block;margin-bottom:10px}
+.lead{font-size:25px;line-height:1.55;max-width:1200px}.small,.small p{font-size:18px;line-height:1.6}.note{font-size:16px;line-height:1.6;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;margin-top:24px}
+.g2,.g3{display:grid;gap:26px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.mt{margin-top:26px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 28px}.card.top{border-top:4px solid var(--accent)}.card.tint{background:var(--soft);border-color:transparent}
+.callout{padding:20px 26px;background:var(--soft);border-left:5px solid var(--accent);border-radius:0 12px 12px 0;font-size:22px;line-height:1.6}
+.chrome{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:22px;padding:16px 24px;background:var(--paper);border-bottom:1px solid var(--line)}
+.brand{font:600 13px var(--mono);letter-spacing:.12em;white-space:nowrap;color:var(--muted)}
+.parts{display:flex;justify-content:center;gap:6px;flex:1}.parts a{text-decoration:none;font-size:16px;white-space:nowrap;padding:8px 15px;border-radius:999px;color:var(--muted)}
+.parts a.on{color:#fff;background:var(--accent)}.parts a:hover{background:var(--soft);color:var(--accent)}
+.mode{border:1px solid var(--line2);background:transparent;border-radius:999px;padding:8px 15px;font-size:15px;white-space:nowrap}
+.js-control{display:none}.js .js-control{display:flex;align-items:center}
+.nav{display:none;position:absolute;bottom:20px;right:40px;gap:14px;z-index:20;align-items:center}
+.nav button{border:1px solid var(--line2);background:transparent;border-radius:8px;padding:7px 12px;font-size:19px}
+.pageno{font:600 14px var(--mono);color:var(--muted);margin-right:10px}
+.progress{display:none;position:absolute;left:0;bottom:0;height:4px;background:var(--accent);transition:width .2s}
+.cover{display:flex;flex-direction:column;justify-content:space-between;gap:60px}
+.cover-main:before{content:"";display:block;width:56px;height:5px;background:var(--p1);margin-bottom:32px}
+.cover .kicker{color:var(--p1)}.tldr{display:grid;grid-template-columns:auto 1fr;gap:8px 28px;margin-top:28px}.tldr .label{color:var(--p1);margin-top:8px}.tldr p{font-family:var(--serif);font-size:31px;line-height:1.5}
+.cover-sub{font-size:21px;max-width:1160px;color:var(--muted)}
+.agenda{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);gap:0}
+.agenda a{display:block;text-decoration:none;padding:24px 28px 8px;border-top:4px solid var(--accent)}.agenda a:first-child{padding-left:0}.agenda a+a{border-left:1px solid var(--line)}.agenda a:hover{background:var(--soft)}.agenda h3{font-family:var(--serif);font-size:28px}.agenda p{font-size:17px;margin-bottom:0;color:var(--muted)}
+.divider{display:grid;grid-template-columns:290px 1fr;gap:40px;align-items:center;background:var(--accent);color:#fff}
+.numeral{font:700 250px/1 var(--serif);color:#ffffff30;text-align:center}.divider h2{font-size:68px;color:#fff}.divider .lead{color:#ffffffe0}.divider .kicker{color:#ffffffba}.divider .divider-route{border-top:1px solid #ffffff40;padding-top:20px;color:#ffffffe0}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 24px;margin-top:22px}summary{font-size:20px;font-weight:600;cursor:pointer}details p{font-size:19px;margin:14px 0 0}
+.flow{display:grid;grid-template-columns:1fr 110px 1fr 110px 1fr;align-items:stretch;margin-top:36px}
+.node{border:1px solid var(--line2);background:white;border-radius:12px;padding:26px 18px;text-align:left}.node b{display:block;font-size:25px;margin-bottom:10px}.node span{display:block;font-size:18px;line-height:1.5;color:var(--muted)}
+.node[aria-pressed="true"]{border:2px solid var(--accent);background:var(--soft)}.node[aria-pressed="true"] b{color:var(--accent)}
+.arrow{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;color:var(--muted)}.arrow span{font-size:14px}.arrow b{font-size:28px;font-weight:400}
+.panel{margin-top:26px;padding:26px 30px;min-height:178px;background:var(--soft);border-radius:12px}.panel p{font-size:20px;margin-bottom:0}.panel[hidden]{display:none}
+.table-wrap{overflow-x:auto;margin-top:28px}table{border-collapse:collapse;width:100%;font-size:20px;line-height:1.55}th,td{padding:18px 20px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{font:600 14px var(--mono);color:var(--accent);letter-spacing:.08em}td:first-child{font-weight:600;white-space:nowrap}
+.state{display:inline-block;white-space:nowrap;font-size:15px;border-radius:999px;padding:4px 12px;color:var(--p2);background:var(--p2-soft)}.state.pending{color:#795816;background:var(--gold-soft)}.state.analysis{color:var(--p3);background:var(--p3-soft)}
+.sources{list-style:none;padding:0;margin:28px 0}.sources li{display:grid;grid-template-columns:70px 1fr;gap:18px;padding:20px 0;border-bottom:1px solid var(--line)}.sources .ref-id{font:600 15px/1.8 var(--mono);color:var(--accent)}.sources p{font-size:18px;margin-top:6px;color:var(--muted)}
+.return{display:none;border:1px solid var(--line2);background:#fff;border-radius:8px;padding:9px 16px;font-size:17px}.return.available{display:inline-block}
+body[data-mode="deck"]{height:100vh;overflow:hidden;background:#24221E}
+body[data-mode="deck"] .deck{position:absolute;left:50%;top:50%;width:1600px;height:900px;max-width:none;margin:0;transform:translate(-50%,-50%) scale(var(--s,1));background:var(--paper);box-shadow:0 30px 80px #0005;overflow:hidden}
+body[data-mode="deck"] .chrome{position:absolute;left:0;right:0;top:0;height:60px;padding:0 88px;background:transparent;gap:36px}
+body[data-mode="deck"] .slide{position:absolute;inset:0;padding:104px 88px 78px;border:0;display:none}
+body[data-mode="deck"] .slide.active{display:flex;flex-direction:column;justify-content:center}
+body[data-mode="deck"] .slide.active.cover{justify-content:space-between;padding-top:115px}
+body[data-mode="deck"] .slide.active.divider{display:grid}
+body[data-mode="deck"] .slide:not(.cover):not(.divider)>h2{position:absolute;top:110px;left:88px;right:88px}
+body[data-mode="deck"] .slide:not(.cover):not(.divider)>h2+.content{margin-top:50px}
+body[data-mode="deck"] .nav{display:flex}body[data-mode="deck"] .progress{display:block}
+body[data-mode="deck"] .deck.on-divider .chrome{color:white;border-color:#ffffff40}
+body[data-mode="deck"] .deck.on-divider .brand,body[data-mode="deck"] .deck.on-divider .parts a,body[data-mode="deck"] .deck.on-divider .pageno{color:#ffffffcc}
+body[data-mode="deck"] .deck.on-divider .parts a.on{background:white;color:var(--accent)}
+body[data-mode="deck"] .deck.on-divider .mode,body[data-mode="deck"] .deck.on-divider .nav button{border-color:#ffffff70}
+body[data-mode="deck"] .deck.on-divider .progress{background:white}
+body[data-mode="read"] .slide{min-height:0}body[data-mode="read"] .divider{border-radius:16px;margin:32px 0}
+body[data-mode="read"] .nav,body[data-mode="read"] .progress{display:none}
+@media(max-width:899px),(max-height:599px){
+  .chrome{flex-wrap:wrap;gap:10px;padding:12px 18px}.brand{font-size:11px}.parts{order:3;width:100%;flex-basis:100%;gap:2px}.parts a{font-size:14px;padding:7px 10px}.mode{margin-left:auto;font-size:13px}
+  .slide{padding:48px 24px;scroll-margin-top:128px}h1{font-size:36px}h2{font-size:29px}h3{font-size:21px}p,li{font-size:18px}.lead{font-size:21px}.cover-sub{font-size:18px}.tldr{display:block}.tldr p{font-size:24px}
+  .g2,.g3{grid-template-columns:1fr;gap:16px}.card{padding:20px}.callout{font-size:19px;padding:18px}.cover{gap:32px}.agenda{grid-template-columns:1fr}.agenda a,.agenda a:first-child{padding:18px}.agenda a+a{border-left:0}.agenda h3{font-size:24px}
+  .divider{grid-template-columns:1fr;gap:12px}.numeral{display:none}.divider h2{font-size:36px}.flow{grid-template-columns:1fr;margin-top:24px}.arrow{padding:12px;gap:0}.arrow b{transform:rotate(90deg)}.node{padding:20px}.node b{font-size:23px}.panel{padding:22px;min-height:0}.panel p{font-size:18px}
+  table{font-size:17px;min-width:580px}th,td{padding:14px}.sources li{grid-template-columns:36px 1fr;gap:10px}.sources p{font-size:16px;overflow-wrap:anywhere}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+@media print{
+  @page{size:A4 landscape;margin:12mm}html{scroll-behavior:auto}body,body[data-mode="deck"]{height:auto;overflow:visible;background:#fff}
+  .deck,body[data-mode="deck"] .deck{position:static;width:auto;height:auto;max-width:none;transform:none;box-shadow:none;background:white}
+  .chrome,.nav,.progress,.return,.note.shortcut{display:none!important}
+  .slide,body[data-mode="deck"] .slide,body[data-mode="deck"] .slide.active{position:static;display:block!important;min-height:0;padding:16mm 10mm;break-after:page;overflow:visible}
+  .slide:last-of-type{break-after:auto}.slide.cover,body[data-mode="deck"] .slide.active.cover{padding:16mm 10mm}.slide.divider,body[data-mode="deck"] .slide.active.divider{display:block!important;background:white;color:var(--ink)}
+  .divider h2,.divider .lead,.divider .kicker,.divider .divider-route{color:var(--ink)}.numeral{display:none}
+  body[data-mode="deck"] .slide:not(.cover):not(.divider)>h2{position:static}body[data-mode="deck"] .slide:not(.cover):not(.divider)>h2+.content{margin:0}
+  h1{font-size:36px}h2,.divider h2{font-size:28px}h3{font-size:20px}p,li,.lead,.tldr p,.callout{font-size:16px}
+  .panel[hidden],details>*{display:block!important}.panel{min-height:0;padding:14px;margin-top:12px}.panel p,details p{font-size:15px}.card{padding:16px}.node{padding:16px}.node b{font-size:20px}.node span{font-size:15px}.flow{margin-top:18px}
+  .table-wrap{overflow:visible}table{font-size:16px;min-width:0}th,td{padding:12px}.card,.panel,tr,.sources li{break-inside:avoid}a{overflow-wrap:anywhere}
+}
+.legend{display:flex;gap:22px;font-size:16px;color:var(--ink2);margin:0 0 14px}.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:8px;vertical-align:-2px}
+.sw-native{background:#9E968A}.sw-central{background:var(--p2)}
+.metric{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px}.metric h3{font-size:19px;margin-bottom:4px}.metric .hint{font-size:14px;color:var(--muted);margin:0 0 12px}
+.bars{display:grid;grid-template-columns:auto 1fr auto;gap:8px 12px;align-items:center}
+.bars .who{font-size:15px;color:var(--ink2);white-space:nowrap}.bars .val{font:600 16px var(--mono);color:var(--ink);white-space:nowrap}.bars .val em{font-style:normal;color:var(--p2);margin-left:6px}
+.track{height:24px}.bar{height:100%;border-radius:0 4px 4px 0;background:#9E968A;min-width:2px}.bar.c{background:var(--p2)}.bar.dim{opacity:.45}
+.bar:hover{outline:2px solid var(--ink);outline-offset:1px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.stat{border-top:3px solid var(--accent);padding-top:12px}.stat b{display:block;font:700 34px/1.2 var(--serif);color:var(--ink)}.stat span{font-size:15px;color:var(--muted);line-height:1.45;display:block;margin-top:4px}
+.ladder{display:grid;grid-template-columns:270px 1fr 150px;gap:9px 14px;align-items:center}.ladder .who{font-size:16px;color:var(--ink2)}.ladder .who small{display:block;font:13px var(--mono);color:var(--muted)}.ladder .val{font:600 16px var(--mono)}.ladder .val small{display:block;font-size:13px;font-weight:400;color:var(--muted)}.ladder .track{height:26px}
+.split{display:grid;grid-template-columns:1.25fr 1fr;gap:30px;align-items:start}
+.share{display:grid;grid-template-columns:150px 1fr 80px;gap:10px 14px;align-items:center;font-size:16px}.share .seg{display:flex;height:26px;border-radius:4px;overflow:hidden;background:var(--line)}.share .seg i{display:block;height:100%}.share .seg .r{background:var(--p2)}.share .seg .p{background:var(--p3);border-left:2px solid #fff}.share .sum{font:600 16px var(--mono)}
+.sw-r{background:var(--p2)}.sw-p{background:var(--p3)}
+pre{font:15px/1.6 var(--mono);background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px;overflow-x:auto;white-space:pre;margin:0;color:var(--ink2)}
+code{font-family:var(--mono);font-size:.88em;background:#EEEAE2;border-radius:4px;padding:1px 5px}
+table.dense{font-size:17px}table.dense th,table.dense td{padding:11px 14px}table.dense td.num,table.dense th.num{text-align:right;font-family:var(--mono)}table.dense tr.hi td{background:var(--soft)}
+.verdict{font-weight:600;color:var(--ink)}.state.no{color:var(--p1);background:var(--p1-soft)}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}.steps li{position:relative;padding:0 0 14px 34px;font-size:17px;line-height:1.55}.steps li:before{counter-increment:s;content:counter(s);position:absolute;left:0;top:2px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font:600 13px/22px var(--mono);text-align:center}
+.flow.f4{grid-template-columns:1fr 170px 1fr 120px 1fr;margin-top:10px}.flow.f4 .arrow span{text-align:center;line-height:1.45}
+.card.compact{padding:16px 22px}.card.compact h3{font-size:19px;margin-bottom:4px}.card.compact p{font-size:16px;margin:0}
+.ladder{gap:5px 14px}.ladder .track{height:22px}
+.sources{margin:18px 0 8px}.sources li{padding:12px 0}.sources p{font-size:16px;margin:4px 0 0}pre{font-size:14px;padding:12px 18px}
+.node code{font-size:14px}
+table.wrap1 td:first-child{white-space:normal;width:25%}table.wrap1 td:nth-child(2){white-space:nowrap}
+@media(max-width:899px),(max-height:599px){.stats{grid-template-columns:1fr 1fr}.ladder{grid-template-columns:1fr auto}.ladder .track{grid-column:1/-1}.split{grid-template-columns:1fr}.share{grid-template-columns:1fr auto}.share .seg{grid-column:1/-1}.flow.f4{grid-template-columns:1fr}}
+@media print{.metric,.stat{break-inside:avoid}pre{white-space:pre-wrap}}
+</style>
+</head>
+<body data-mode="read">
+<div class="deck" id="deck" data-part="0">
+  <header class="chrome">
+    <a class="brand" href="#overview">ROBOTWIN · 集中渲染</a>
+    <nav class="parts" aria-label="章节">
+      <a href="#results" data-part="1">I · 结果</a>
+      <a href="#why" data-part="2">II · 原因与机制</a>
+      <a href="#correct" data-part="3">III · 正确性与限制</a>
+    </nav>
+    <button class="mode js-control" id="mode" type="button">切换阅读模式</button>
+  </header>
+  <main>
+    <section class="slide cover active" id="overview" data-part="0" aria-labelledby="cover-title">
+      <div class="cover-main">
+        <div class="kicker">RoboTwin 评测加速 · 实验报告 · 2026-11-13</div>
+        <h1 id="cover-title">每卡一个渲染进程：<br>单卡端到端快 1.23×，动作逐集一致</h1>
+        <div class="tldr"><span class="label">核心结论</span><p>50 个任务 × 500 集：吞吐 +25%（稳态 +37%），500/500 集动作与 native 相同；到不了 2×，因为渲染和推理在 GPU 上只能分时。</p></div>
+        <p class="cover-sub">单卡 RTX 4090（49 GB）；SAPIEN RT 32 spp、OIDN 降噪、320×240；StarVLA Qwen3-VL-OFT，动作 horizon 16。代码分支 <code>central-render-k-sweep</code>，提交 <code>dfaa507</code>。</p>
+      </div>
+      <div class="agenda" aria-label="阅读路线">
+        <a href="#results" data-part="1"><span class="label">PART I</span><h3>结果</h3><p>500 集主对照，以及与学长预测的对照。</p></a>
+        <a href="#why" data-part="2"><span class="label">PART II</span><h3>原因与机制</h3><p>GPU 为什么是零和的，收益从哪里来，通用镜像怎么工作。</p></a>
+        <a href="#correct" data-part="3"><span class="label">PART III</span><h3>正确性与限制</h3><p>逐集一致的条件、显存事故、尚未完成的部分和复现方法。</p></a>
+      </div>
+    </section>
+
+    <section class="slide" id="results" data-part="1" aria-labelledby="results-title">
+      <h2 id="results-title">500 集对照：吞吐 +25%，墙钟快 1.23×</h2>
+      <div class="content">
+        <div class="legend"><span><i class="sw-native"></i>native K6/G2（干净基线）</span><span><i class="sw-central"></i>central K12/G3，严格模式，每卡 2 个渲染服务</span></div>
+        <div class="g3">
+          <div class="metric"><h3>正式吞吐</h3><p class="hint">步/s，越高越好；含收尾</p>
+            <div class="bars">
+              <span class="who">native</span><div class="track"><div class="bar" style="width:72.6%" title="native 正式吞吐 123.5 步/s"></div></div><span class="val">123.5</span>
+              <span class="who">central</span><div class="track"><div class="bar c" style="width:90.9%" title="central 正式吞吐 154.5 步/s，+25.1%"></div></div><span class="val">154.5<em>+25.1%</em></span>
+            </div></div>
+          <div class="metric"><h3>稳态吞吐</h3><p class="hint">步/s，越高越好；至剩 K−1 个 worker 为止</p>
+            <div class="bars">
+              <span class="who">native</span><div class="track"><div class="bar" style="width:69.4%" title="native 稳态吞吐 125.0 步/s"></div></div><span class="val">125.0</span>
+              <span class="who">central</span><div class="track"><div class="bar c" style="width:95.1%" title="central 稳态吞吐 171.1 步/s，+36.9%"></div></div><span class="val">171.1<em>+36.9%</em></span>
+            </div></div>
+          <div class="metric"><h3>含加载的总墙钟</h3><p class="hint">秒，越低越好</p>
+            <div class="bars">
+              <span class="who">native</span><div class="track"><div class="bar" style="width:96.2%" title="native 总墙钟 1731.0 s"></div></div><span class="val">1731</span>
+              <span class="who">central</span><div class="track"><div class="bar c" style="width:78.2%" title="central 总墙钟 1407.5 s，快 1.23×"></div></div><span class="val">1408<em>1.23×</em></span>
+            </div></div>
+        </div>
+        <div class="stats mt">
+          <div class="stat"><b>500 / 500</b><span>集动作与 native 逐集相同</span></div>
+          <div class="stat"><b>233 / 233</b><span>成功集数相同；总步数都是 208789</span></div>
+          <div class="stat"><b>43.7 / 44.0 GB</b><span>显存峰值（native / central），相近显存下 central 跑 K12/G3</span></div>
+          <div class="stat"><b>0 / 0</b><span>两边日志里的渲染错误数</span></div>
+        </div>
+        <p class="note">条件：50 任务 × 10 集，shard=10，跳过 front 相机，双方都开 MPS，同一张 4090（m1）上成对运行。K = 仿真 worker 数，G = Policy 副本数。按正式吞吐线性推算完整 5000 集（约 209 万步）：native 约 4.7 h，central 约 3.75 h；这只是推算，没有实际运行。</p>
+      </div>
+    </section>
+
+    <section class="slide" id="forecast" data-part="1" aria-labelledby="forecast-title">
+      <h2 id="forecast-title">与学长的预测对照：方向对，幅度到不了</h2>
+      <div class="content">
+        <div class="table-wrap" style="margin-top:0"><table class="dense wrap1"><thead><tr><th scope="col">设想</th><th scope="col">预测</th><th scope="col">实测 / 判断</th><th scope="col">状态</th></tr></thead><tbody>
+          <tr><td>每卡一个渲染进程，同 K、同 G</td><td>最多约 2×</td><td>单任务 +15–21%（m1、m3 都复现）；渲染与推理不能在 GPU 上并行，2× 没有物理空间</td><td><span class="state no">不成立</span></td></tr>
+          <tr><td>省下的显存换成更多 worker 与副本，再开 MPS</td><td>未单列</td><td>单任务 +41–47%；50 任务 500 集 +25%（稳态 +37%），墙钟 1.23×</td><td><span class="state">已测</span></td></tr>
+          <tr><td>100+ worker</td><td>最多约 4×</td><td>单卡 K12–16 时 GPU 已经饱和（K16 不比 K12 快）；继续加 worker 不会增加 GPU 时间</td><td><span class="state no">不成立</span></td></tr>
+          <tr><td>四卡、48 worker、5000 集</td><td>约 2000 s</td><td>按单卡比例推算四卡约 1.2–1.3×，即约 2800–3000 s（基线 3800–3900 s）</td><td><span class="state pending">未实测</span></td></tr>
+        </tbody></table></div>
+        <div class="callout mt">要逼近 2×，必须减少每一步的 GPU 工作量，例如 Policy 批量推理或更少的 spp。这些会改变评测本身或模型数值，不属于集中渲染能解决的问题。</div>
+        <p class="note">学长表格的基线是 48 worker、跳过 front、约 583 步/s，应当是四卡（约 146 步/s/卡）。本轮没有那台四卡机器，所有数字来自单卡成对运行。</p>
+      </div>
+    </section>
+
+    <section class="slide divider" id="why" data-part="2" aria-labelledby="why-title">
+      <div class="numeral" aria-hidden="true">II</div>
+      <div><div class="kicker">原因与机制</div><h2 id="why-title">GPU 时间是零和的</h2><p class="lead">集中渲染不会让单次渲染变快，也不会让渲染与推理并行。它省掉的是重复的显存和每集重建场景的开销，再把省下的显存换成更多 worker 和 Policy 副本。</p><p class="divider-route">接下来：分时测量 → 收益拆解 → 通用镜像的结构。</p></div>
+    </section>
+
+    <section class="slide" id="gpu" data-part="2" aria-labelledby="gpu-title">
+      <h2 id="gpu-title">渲染和推理同时跑，合计只有 0.95–1.12 份 GPU</h2>
+      <div class="content split">
+        <div>
+          <div class="legend"><span><i class="sw-r"></i>渲染（相对单独运行的比例）</span><span><i class="sw-p"></i>CUDA 推理（同上）</span></div>
+          <div class="share">
+            <span>理想并行</span><div class="seg"><i class="r" style="width:50%"></i><i class="p" style="width:50%"></i></div><span class="sum">2.00</span>
+            <span>两个进程同时跑</span><div class="seg" title="渲染 50.0 图/s（60%）+ 推理 101 次/s（52%）"><i class="r" style="width:30%"></i><i class="p" style="width:26%"></i></div><span class="sum">1.12</span>
+            <span>同一进程同时跑</span><div class="seg" title="渲染 58.8 图/s（71%）+ 推理 47.5 次/s（24%）"><i class="r" style="width:35.5%"></i><i class="p" style="width:12%"></i></div><span class="sum">0.95</span>
+          </div>
+          <p class="small mt">E5 微基准：单独运行时渲染 82.7 图/s、CUDA 推理 195 次/s。两者一起跑时各自掉到 60% 和 52%，加起来只比一份 GPU 多 12%。放进同一个进程反而更差。</p>
+          <div class="callout">单卡吞吐 ≈ 16 步 ÷（每次观测的渲染 GPU 时间 + 每次推理的 GPU 时间）</div>
+        </div>
+        <div>
+          <article class="card top"><span class="label">单个渲染进程的上限</span><h3>约 82–85 图/s，加线程或批量提交都没用</h3>
+            <table class="dense"><tbody>
+              <tr><td>线程池 1 / 2 / 4 / 8</td><td class="num">81.8 / 78.3 / 69.4 / 67.8</td></tr>
+              <tr><td>32 相机一次提交</td><td class="num">85.5</td></tr>
+              <tr><td>每场景 4 相机耗时</td><td class="num">39.5 ms</td></tr>
+            </tbody></table>
+            <p class="small" style="margin-top:12px">RT 内核按相机串行；<code>take_picture</code> 不释放 GIL，OIDN 内部有 <code>cudaStreamSynchronize</code>。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="gains" data-part="2" aria-labelledby="gains-title">
+      <h2 id="gains-title">收益来自省下的显存：同配置 +21%，最好配置 +47%</h2>
+      <div class="content">
+        <div class="legend"><span><i class="sw-native"></i>native</span><span><i class="sw-central"></i>central</span><span style="color:var(--muted)">单任务 adjust_bottle，96 集，跳过 front，m1；右侧为正式吞吐与显存峰值</span></div>
+        <div class="ladder">
+          <span class="who">native K8/G2<small>显存已到 49 GB 上限</small></span><div class="track"><div class="bar" style="width:62.6%" title="106.4 步/s，48.0 GB"></div></div><span class="val">106.4<small>48.0 GB</small></span>
+          <span class="who">native K8/G2 + MPS<small>MPS 只 +0.9%</small></span><div class="track"><div class="bar" style="width:63.2%" title="107.4 步/s，48.0 GB"></div></div><span class="val">107.4<small>48.0 GB</small></span>
+          <span class="who">central K8/G2<small>同配置，+20.9%</small></span><div class="track"><div class="bar c" style="width:75.6%" title="128.6 步/s，29.0 GB"></div></div><span class="val">128.6<small>29.0 GB</small></span>
+          <span class="who">central K12/G2<small>用省下的显存加 worker</small></span><div class="track"><div class="bar c" style="width:85.8%" title="145.8 步/s，31.9 GB"></div></div><span class="val">145.8<small>31.9 GB</small></span>
+          <span class="who">central K12/G3<small>加副本几乎不再提升</small></span><div class="track"><div class="bar c" style="width:86.9%" title="147.8 步/s，42.2 GB"></div></div><span class="val">147.8<small>42.2 GB</small></span>
+          <span class="who">central K12/G3 + MPS<small>相对 native+MPS +46.9%</small></span><div class="track"><div class="bar c" style="width:92.8%" title="157.7 步/s，42.3 GB"></div></div><span class="val">157.7<small>42.3 GB</small></span>
+        </div>
+        <div class="g3 mt">
+          <div class="card tint compact"><h3>省显存</h3><p class="small">GPU 上只剩一个 Vulkan context。同 K8/G2，显存 48.0 → 29.0 GB。</p></div>
+          <div class="card tint compact"><h3>首帧不再阻塞</h3><p class="small">native 每集重建 RT 场景，首次观测均值 2138 ms；central 302 ms。其余观测两者相当。</p></div>
+          <div class="card tint compact"><h3>MPS 开始起作用</h3><p class="small">native 下 8 个 Vulkan context 在分时，MPS +0.9%；central 下 Policy 副本能互相重叠，+4–7%。</p></div>
+        </div>
+        <p class="note">复现：最好配置对照倒序重复为 107.8 → 158.8（+47.3%）；第二台机器 m3 为 103.1 → 145.4（+41.0%）。每组 96 集动作逐集相同。</p>
+      </div>
+    </section>
+
+    <section class="slide" id="arch" data-part="2" aria-labelledby="arch-title">
+      <h2 id="arch-title">通用镜像：worker 记录视觉构造，渲染服务按记录重放</h2>
+      <div class="content">
+        <p class="lead">原实现只支持 adjust_bottle（服务端手写瓶子模板）。现在任务代码原样运行，50 个任务都能集中渲染。点击节点查看细节。</p>
+        <div class="flow f4" aria-label="通用镜像的数据路径">
+          <button class="node" type="button" data-node="worker" aria-pressed="true" aria-controls="panel-worker"><b>仿真 worker</b><span>CPU 物理，无渲染设备<br><code>visual_capture.py</code></span></button>
+          <div class="arrow"><span>reset：场景记录<br>每帧：实体与相机位姿</span><b aria-hidden="true">→</b><span>Unix socket</span></div>
+          <button class="node" type="button" data-node="service" aria-pressed="false" aria-controls="panel-service"><b>渲染服务（每卡 2 个）</b><span>重放记录，RT 渲染<br><code>spec_scene.py</code></span></button>
+          <div class="arrow"><span>RGB 图像</span><b aria-hidden="true">→</b><span>共享内存</span></div>
+          <button class="node" type="button" data-node="policy" aria-pressed="false" aria-controls="panel-policy"><b>Policy 副本（G 个）</b><span>StarVLA，CUDA MPS<br>返回 16 步动作</span></button>
+        </div>
+        <div class="panel" id="panel-worker" role="region" aria-label="worker 详情"><span class="label">worker · 记录而不渲染</span><p>无 GPU 的进程里连 <code>RenderMaterial()</code> 都会段错误。所以把 <code>sapien.render</code> 中描述视觉的类（材质、纹理、各类 RenderShape、RenderBodyComponent）换成只记录调用的替身，在 <code>Scene.add_entity</code> 处截下渲染组件，并记录灯光和相机加载的位置。ActorBuilder、URDF 加载器和任务代码都不改。</p></div>
+        <div class="panel" id="panel-service" role="region" aria-label="渲染服务详情" hidden><span class="label">渲染服务 · 按同样的调用重建</span><p>按记录顺序用真实的 <code>sapien.render</code> 类重放，得到无物理的视觉场景；相同材质和纹理只建一次。严格模式（<code>FRESH=1</code>）每集新建场景，每 5×槽位数次重建调用一次 <code>clear_cache()</code>。worker 用排他文件抢占槽位，按槽位交错分到 2 个服务。</p></div>
+        <div class="panel" id="panel-policy" role="region" aria-label="Policy 详情" hidden><span class="label">Policy · 与 native 相同</span><p>Policy 端与 native 完全相同，只是收到的图像来自集中服务。由于 GPU 上只剩一个 Vulkan context，MPS 下的多个副本可以互相重叠，这是 central 能用 G3 的原因。</p></div>
+        <p class="note">开关：<code>GENERIC=1</code> 通用镜像 · <code>FRESH=1</code> 严格模式 · <code>SERVICES=2</code> 每卡服务数 · <code>SKIP_FRONT=1</code> 跳过 front 相机 · <code>MPS=1</code>。native / central 可随时切换。</p>
+      </div>
+    </section>
+
+    <section class="slide" id="correct" data-part="3" aria-labelledby="correct-title">
+      <h2 id="correct-title">逐集一致有两个前提：native 不爆显存，central 每集新建场景</h2>
+      <div class="content">
+        <div class="g2">
+          <article class="card top"><span class="label">native K8/G2 · 显存超载</span><h3>降噪失败，画面出错，动作改变</h3><p class="small">约 48.5 GB，多任务时出现 <code>OIDN out of memory</code> 和 <code>cannot create buffer</code>。差异集全部落在出过这类错误的 worker 上。所以 native 在这张卡上的有效配置是 K6/G2。</p></article>
+          <article class="card top"><span class="label">central · 复用场景</span><h3>RT 结果差 1 个灰度级</h3><p class="small">同一组位姿在复用过的场景里渲染，首帧约 7% 像素差 ±1，约 3.5% 的集动作分叉。两集的场景记录逐字节相同也会如此，推测是加速结构只随位姿更新、不重建。</p></article>
+        </div>
+        <div class="callout mt">严格模式（<code>FRESH=1</code>）每集新建场景：像素核查 8 集 × 3 帧 × 3 相机共 72 张图逐像素相同；50 任务 200/200、500 集 500/500 动作与干净 native 相同。</div>
+        <p class="note">native 自身是稳定的：改用独立引擎（<code>SHARED_ENGINE=0</code>）与共享引擎 8/8 相同。单任务 adjust_bottle 的对照用的是复用模式，动作也全部一致，但那只是这个任务上碰巧一致，不构成保证。</p>
+      </div>
+    </section>
+
+    <section class="slide" id="strict" data-part="3" aria-labelledby="strict-title">
+      <h2 id="strict-title">严格模式的代价：每卡开 2 个渲染服务就能补回来</h2>
+      <div class="content">
+        <p class="label">50 任务 × 4 集，跳过 front，双方都开 MPS；动作一致性以干净的 native K6/G2 为基准</p>
+        <div class="table-wrap" style="margin-top:0"><table class="dense"><thead><tr><th scope="col">运行</th><th scope="col" class="num">正式 步/s</th><th scope="col" class="num">稳态 步/s</th><th scope="col" class="num">墙钟 s</th><th scope="col" class="num">显存 GB</th><th scope="col" class="num">动作一致</th></tr></thead><tbody>
+          <tr><td>native K6/G2（基准）</td><td class="num">117.2</td><td class="num">119.6</td><td class="num">707.7</td><td class="num">43.8</td><td class="num">—</td></tr>
+          <tr><td>native K8/G2，显存超载</td><td class="num">130.0</td><td class="num">131.2</td><td class="num">648.7</td><td class="num">48.5</td><td class="num">197/200</td></tr>
+          <tr><td>central K12/G3，复用场景</td><td class="num">149.2</td><td class="num">170.3</td><td class="num">583.9</td><td class="num">43.4</td><td class="num">193/200</td></tr>
+          <tr><td>central，严格模式，1 个服务</td><td class="num">143.8</td><td class="num">156.5</td><td class="num">599.4</td><td class="num">43.1</td><td class="num">200/200</td></tr>
+          <tr class="hi"><td>central，严格模式，2 个服务（推荐）</td><td class="num">158.3</td><td class="num">171.1</td><td class="num">552.8</td><td class="num">46.0</td><td class="num">200/200</td></tr>
+          <tr><td>central，严格模式，3 个服务</td><td class="num">160.2</td><td class="num">174.0</td><td class="num">545.4</td><td class="num">48.2</td><td class="num">200/200</td></tr>
+        </tbody></table></div>
+        <p class="note">严格模式每集的场景重建在单个服务里串行，拆成 2 个服务快约 10%；第 3 个服务只再多约 1%，显存已贴近上限。</p>
+      </div>
+    </section>
+
+    <section class="slide" id="limits" data-part="3" aria-labelledby="limits-title">
+      <h2 id="limits-title">500 集运行中的显存事故，以及还没做的部分</h2>
+      <div class="content g2">
+        <article class="card top"><span class="label">事故与修复</span>
+          <ol class="steps">
+            <li>第一次 500 集严格模式运行，约 400 集时一个渲染服务显存耗尽后崩溃；SDK 重启的 worker 拿不到槽位，这一组无法恢复。记录保留。</li>
+            <li>原因：native 每 5 集调用一次 <code>sapien.render.clear_cache()</code>，集中模式里一直没有执行，渲染缓存只增不减。</li>
+            <li>修复：关闭旧场景后 <code>gc.collect()</code>，并按重建次数周期性 <code>clear_cache()</code>。</li>
+            <li>重跑：500 集全程显存稳定在 42–44 GB，0 个错误，即第 I 部分的主结果。</li>
+          </ol>
+        </article>
+        <article class="card top"><span class="label">限制与未完成</span>
+          <table class="dense"><tbody>
+            <tr><td><span class="state pending">未实测</span></td><td>四卡、48 worker 的数字；四卡约 1.2–1.3× 只是按单卡比例推算</td></tr>
+            <tr><td><span class="state pending">未运行</span></td><td>完整 5000 集评测</td></tr>
+            <tr><td><span class="state no">限制</span></td><td>渲染服务崩溃后无法恢复，重启的 worker 也不能重新挂接</td></tr>
+            <tr><td><span class="state no">限制</span></td><td>native 与 central 只在同一台机器上逐位可比；跨机器 rollout 本来就不完全一致</td></tr>
+          </tbody></table>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="sources" data-part="3" aria-labelledby="sources-title">
+      <h2 id="sources-title">复现与证据</h2>
+      <div class="content">
+        <pre>base=&lt;实验目录&gt;   # 需要完整 RoboTwin objects 资产
+# 50 任务严格模式主结果（每个 spec：MODE:K:EPISODES:SHARD:G）
+TASKS=50 GENERIC=1 SKIP_FRONT=1 MPS=1 FRESH=1 SERVICES=2 bash $base/run_sweep.sh NAME \
+  central:12:10:10:3 native:6:10:10:2
+python3 $base/compare_actions.py NAME-native-... NAME-central-...   # 逐集动作比较
+
+# 单任务最好配置对照
+MPS=1 SKIP_FRONT=1 bash $base/run_sweep.sh NAME native:8:96:4:2 central:12:96:4:3</pre>
+        <ul class="sources">
+          <li><span class="ref-id">[1]</span><div><b>完整实验记录</b>：<code>K_SWEEP_RESULTS.md</code><p>分支 <code>central-render-k-sweep</code>，提交 <code>dfaa507</code>：全部表格、根因分析、事故记录、复现命令。</p></div></li>
+          <li><span class="ref-id">[2]</span><div><b>运行证据</b>：<code>evidence/k-sweep-20261113/{m1, m3, m1-multitask}</code><p>各运行的 <code>arm-result.json</code>、服务统计、SDK 结果与 sweep 日志；逐步 trace 与资源采样留在实验机上。</p></div></li>
+          <li><span class="ref-id">[3]</span><div><b>主要代码</b><p><code>central_render_service.py</code> · <code>central_launch.py</code> · <code>visual_capture.py</code> · <code>spec_scene.py</code> · <code>native_backend.py</code> · <code>run_sweep.sh</code></p></div></li>
+        </ul>
+        <button type="button" class="return" id="return-source">↩ 返回引用位置</button>
+        <p class="note shortcut">桌面：← / → 翻页，Home / End 跳首尾；顶部可切换阅读模式。页面不加载任何外部字体或脚本。</p>
+      </div>
+    </section>
+  </main>
+  <div class="nav js-control" aria-label="翻页"><span class="pageno" id="pageno" aria-live="polite"></span><button type="button" id="prev" aria-label="上一页">←</button><button type="button" id="next" aria-label="下一页">→</button></div>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const deck = document.getElementById('deck');
+  const slides = [...document.querySelectorAll('.slide')];
+  const modeButton = document.getElementById('mode');
+  const compact = matchMedia('(max-width:899px), (max-height:599px)');
+  const parts = [...document.querySelectorAll('.parts a')];
+  let current = 0;
+  let preferredMode = 'deck';
+  let returnTo = null;
+  const reading = () => document.body.dataset.mode === 'read';
+  function fit(){ deck.style.setProperty('--s', Math.min(innerWidth / 1600, innerHeight / 900)); }
+  function update(){
+    const part = slides[current].dataset.part;
+    deck.dataset.part = part;
+    deck.classList.toggle('on-divider', !reading() && slides[current].classList.contains('divider'));
+    slides.forEach((slide, index) => {
+      const hidden = !reading() && index !== current;
+      slide.classList.toggle('active', index === current);
+      slide.inert = hidden;
+      slide.setAttribute('aria-hidden', String(hidden));
+    });
+    parts.forEach(link => {
+      link.classList.toggle('on', link.dataset.part === part);
+      if(link.dataset.part === part) link.setAttribute('aria-current','true');
+      else link.removeAttribute('aria-current');
+    });
+    document.getElementById('pageno').textContent = `${String(current + 1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
+    document.getElementById('prev').disabled = current === 0;
+    document.getElementById('next').disabled = current === slides.length - 1;
+    document.getElementById('progress').style.width = `${(current + 1) / slides.length * 100}%`;
+  }
+  function show(index, scroll = true, changeHash = true){
+    current = Math.max(0, Math.min(slides.length - 1,index));
+    update();
+    if(changeHash){ try{ history.replaceState(null,'',`#${slides[current].id}`); }catch{ /* 某些本地浏览器限制 history API；正文与导航仍可用。 */ } }
+    if(reading() && scroll) slides[current].scrollIntoView({block:'start'});
+  }
+  function applyMode(scroll = true){
+    document.body.dataset.mode = compact.matches ? 'read' : preferredMode;
+    modeButton.textContent = compact.matches ? '窄屏阅读' : reading() ? '切换演示模式' : '切换阅读模式';
+    modeButton.disabled = compact.matches;
+    fit(); update();
+    if(reading() && scroll) slides[current].scrollIntoView({block:'start'});
+  }
+  function indexForHash(){
+    const target = document.getElementById(location.hash.slice(1));
+    const slide = target?.closest('.slide');
+    return slide ? slides.indexOf(slide) : 0;
+  }
+  document.body.classList.add('js');
+  current = indexForHash();
+  applyMode(false);
+  if(location.hash && reading()) slides[current].scrollIntoView({block:'start'});
+  document.getElementById('prev').addEventListener('click', () => show(current - 1));
+  document.getElementById('next').addEventListener('click', () => show(current + 1));
+  modeButton.addEventListener('click', () => { preferredMode = reading() ? 'deck' : 'read'; applyMode(); });
+  document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener('click', event => {
+    const target = document.getElementById(link.getAttribute('href').slice(1));
+    const slide = target?.closest('.slide');
+    if(!slide) return;
+    event.preventDefault();
+    if(link.hasAttribute('data-source-link')){
+      const sourceSlide = link.closest('.slide');
+      returnTo = sourceSlide ? slides.indexOf(sourceSlide) : current;
+      document.getElementById('return-source').classList.add('available');
+    }
+    show(slides.indexOf(slide));
+    target.tabIndex = -1;
+    target.focus({preventScroll:true});
+  }));
+  document.getElementById('return-source').addEventListener('click', () => {
+    if(returnTo === null) return;
+    show(returnTo); slides[current].tabIndex = -1; slides[current].focus({preventScroll:true});
+    returnTo = null; document.getElementById('return-source').classList.remove('available');
+  });
+  document.querySelectorAll('[data-node]').forEach(button => button.addEventListener('click', () => {
+    document.querySelectorAll('[data-node]').forEach(node => {
+      const selected = node === button;
+      node.setAttribute('aria-pressed',String(selected));
+      document.getElementById(node.getAttribute('aria-controls')).hidden = !selected;
+    });
+  }));
+  addEventListener('keydown', event => {
+    if(reading() || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+    if(event.target.closest('input,textarea,select,button,a,summary,video,audio,[contenteditable]')) return;
+    if(['ArrowRight','PageDown',' '].includes(event.key)){ event.preventDefault(); show(current + 1); }
+    else if(['ArrowLeft','PageUp'].includes(event.key)){ event.preventDefault(); show(current - 1); }
+    else if(event.key === 'Home'){ event.preventDefault(); show(0); }
+    else if(event.key === 'End'){ event.preventDefault(); show(slides.length - 1); }
+  });
+  addEventListener('hashchange', () => show(indexForHash(),true,false));
+  addEventListener('resize', fit);
+  compact.addEventListener('change', () => applyMode());
+  // 打印时将隐藏正文从辅助技术/交互隐藏状态恢复，之后回到原阅读模式。
+  addEventListener('beforeprint', () => {
+    slides.forEach(slide => {slide.inert = false; slide.setAttribute('aria-hidden','false');});
+    document.querySelectorAll('details').forEach(detail => {detail.dataset.printOpen = String(detail.open); detail.open = true;});
+  });
+  addEventListener('afterprint', () => {
+    document.querySelectorAll('details').forEach(detail => {detail.open = detail.dataset.printOpen === 'true'; delete detail.dataset.printOpen;});
+    update();
+  });
+})();
+</script>
+</body>
+</html>
