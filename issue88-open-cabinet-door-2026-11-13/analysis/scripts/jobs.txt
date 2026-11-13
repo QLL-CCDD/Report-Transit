@@ -1,0 +1,14 @@
+start|/dev/shm/e10-door88/scratch/train/model_000899.pt
+s2cap-2.5M|/dev/shm/e10-door88/cap-8872b/train/model_000299.pt
+s2unc-2.5M|/dev/shm/e10-door88/peak-8872b/train/model_000299.pt
+s3cap-2.5M|/dev/shm/e10-door88/cap-8873b/train/model_000299.pt
+s3unc-2.5M|/dev/shm/e10-door88/peak-8873b/train/model_000299.pt
+s1cap-2.5M|/dev/shm/e10-door88/cap-8871b/train/model_000299.pt
+s2cap-5.7M|/dev/shm/e10-door88/cap-8872b/train/model_000699.pt
+s2unc-5.7M|/dev/shm/e10-door88/peak-8872b/train/model_000699.pt
+s3cap-5.7M|/dev/shm/e10-door88/cap-8873c/train/model_000299.pt
+s3unc-5.8M|/dev/shm/e10-door88/peak-8873c/train/model_000199.pt
+s1cap-5.7M|/dev/shm/e10-door88/cap-8871b/train/model_000699.pt
+s1unc-4.1M|/dev/shm/e10-door88/diagck/r337/model_000499.pt
+s2unc-10.3M|/dev/shm/e10-door88/peak-8872c/train/model_000299.pt
+s3cap-15M|/dev/shm/e10-door88/cap-8873c/train/model.pt

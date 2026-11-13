@@ -1,0 +1,13 @@
+start-sto|/dev/shm/e10-door88/scratch/train/model_000899.pt|--eval_stochastic
+s2cap-2.5M-sto|/dev/shm/e10-door88/cap-8872b/train/model_000299.pt|--eval_stochastic
+s2unc-2.5M-sto|/dev/shm/e10-door88/peak-8872b/train/model_000299.pt|--eval_stochastic
+s3cap-2.5M-sto|/dev/shm/e10-door88/cap-8873b/train/model_000299.pt|--eval_stochastic
+s3unc-2.5M-sto|/dev/shm/e10-door88/peak-8873b/train/model_000299.pt|--eval_stochastic
+s1cap-2.5M-sto|/dev/shm/e10-door88/cap-8871b/train/model_000299.pt|--eval_stochastic
+s2cap-5.7M-sto|/dev/shm/e10-door88/cap-8872b/train/model_000699.pt|--eval_stochastic
+s2unc-5.7M-sto|/dev/shm/e10-door88/peak-8872b/train/model_000699.pt|--eval_stochastic
+s3cap-5.7M-sto|/dev/shm/e10-door88/cap-8873c/train/model_000299.pt|--eval_stochastic
+s3unc-5.8M-sto|/dev/shm/e10-door88/peak-8873c/train/model_000199.pt|--eval_stochastic
+s1cap-5.7M-sto|/dev/shm/e10-door88/cap-8871b/train/model_000699.pt|--eval_stochastic
+s2unc-10.3M-sto|/dev/shm/e10-door88/peak-8872c/train/model_000299.pt|--eval_stochastic
+s3cap-15M-sto|/dev/shm/e10-door88/cap-8873c/train/model.pt|--eval_stochastic
