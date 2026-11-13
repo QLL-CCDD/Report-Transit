@@ -1,0 +1,24 @@
+# 扳手套螺母（a2r issue #90）：补点、起点分布与课程学习（2026-11-13）
+
+打开 [wrench_stage_learning.html](wrench_stage_learning.html) 即可。图表和样式全部内嵌在文件里，只有第 4 节的任务视频需要联网，从 Hugging Face `syding9/a2r-issue90-wrench` 加载。
+
+报告内容：
+
+1. 训练进度：补点前与补点后（加夹爪修正）从零训练，按环境步数画出各阶段的开放时刻和完整库评测。
+2. 起点分布：手相对螺母的位置，每个库各有侧视、俯视两张平面图，另有一张可旋转的三维图。涉及四个库：补点前（r4）、补点后（r5）、连续体库第一版（11 月 12 日建，1.3 万行）、全量点库（11 月 13 日建，3.7 万行）。
+3. 连续体库第一版上的两种课程：按进度分档（R399）和按类型解锁（R400）。两条都卡在对准、推进阶段后被主动停止，没有得出结论。这一节包括课程策略表、训练曲线、现象和初步判断。
+4. 十类起点的任务视频。
+
+仓库源：`Shiki42/a2r`，集成分支 `codex/issue90-wrench-transition`，对应 PR #114；报告在仓库里的路径是 `ideas/wrench_stage_learning.html`。
+
+## analysis/
+
+报告的生成脚本和数据。脚本里的路径都是节点 C 上的实际路径，在别的机器上不能直接运行。
+
+| 文件 | 作用 |
+| --- | --- |
+| `report_data.py` | 在节点 C 上运行，只读。汇总各次训练的进度（按环境步数），并从各起点库中抽样手相对螺母的位置：每 1 cm 小格、每类起点最多留 2 个点，每个库最多 5000 个点。输出 `report-data.json`。 |
+| `stall_an.py` | 在节点 C 上运行，只读训练历史。整理 R399 和 R400 在卡住阶段的训练成功率、回合长度和评测结果。输出 `stall.json`。 |
+| `dist_an.py` | 比较 v1 库（先定阶段再采点）和连续体库（先采整条专家轨迹再切片）的同类最近邻距离和覆盖情况。 |
+| `build_report.py` | 在 Mac 上运行：`python3 build_report.py report-data.json videos.json OUT.html stall.json`，生成单文件 HTML。 |
+| `report-data.json`、`stall.json`、`videos.json` | 本版报告实际使用的输入数据。 |

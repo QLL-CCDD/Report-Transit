@@ -1,0 +1,72 @@
+[
+ {
+  "stage": "p75 已插入 75%",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env14_p75_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env0_p75_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 7941",
+  "expert_note": "同一 cache_entry 7941"
+ },
+ {
+  "stage": "p50",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env13_p50_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env1_p50_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 7234",
+  "expert_note": "同一 cache_entry 7234"
+ },
+ {
+  "stage": "p25",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env4_p25_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env2_p25_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 5798",
+  "expert_note": "同一 cache_entry 5798"
+ },
+ {
+  "stage": "aligned 入口对齐",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env1_aligned_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env3_aligned_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 2405",
+  "expert_note": "同一 cache_entry 2405"
+ },
+ {
+  "stage": "near 接近",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env5_near_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env4_near_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 650",
+  "expert_note": "同一 cache_entry 650"
+ },
+ {
+  "stage": "grasped_far 持物远处",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env3_grasped_far_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env5_grasped_far_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 10633",
+  "expert_note": "同一 cache_entry 10633"
+ },
+ {
+  "stage": "pick_lift 刚抓起",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env2_pick_lift_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env6_pick_lift_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 18220",
+  "expert_note": "同一 cache_entry 18220"
+ },
+ {
+  "stage": "pick_close 张开贴近抓点",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env6_pick_close_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env7_pick_close_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 16767",
+  "expert_note": "同一 cache_entry 16767"
+ },
+ {
+  "stage": "pick_descend 张开下降中",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env26_pick_descend_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env8_pick_descend_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 20052",
+  "expert_note": "同一 cache_entry 20052"
+ },
+ {
+  "stage": "pregrasp 完整任务起点",
+  "rl": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-rl/spec-industrial-wrench_slide_onto_nut_env0_pregrasp_success.mp4",
+  "expert": "https://huggingface.co/syding9/a2r-issue90-wrench/resolve/4655ee3284c3e9c9dd210f3732dc002dc34185ec/issue90-claude-report-20261112/videos-r395-final/video-expert/spec-industrial-wrench_slide_onto_nut_env9_pregrasp_success.mp4",
+  "rl_note": "R395 最终权重，确定性；cache_entry 15141",
+  "expert_note": "同一 cache_entry 15141"
+ }
+]
