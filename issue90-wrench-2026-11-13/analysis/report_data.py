@@ -46,7 +46,7 @@ def lineage():
 
 def runs(dirs):
     """first opening of every stage / band, end, and every full-bank evaluation of orchestrated runs"""
-    ev, evals, s0 = {}, [], 0
+    ev, evals, s0, last = {}, [], 0, {}
     for d in dirs:
         prog = json.load(open(f"{d}/progress.json")) if glob.glob(f"{d}/progress.json") else {"rounds": []}
         for rd in sorted(glob.glob(f"{d}/round-*/train")):
@@ -61,7 +61,8 @@ def runs(dirs):
                     pt = r["evaluation"]
                     a, b = sum(v["successes"] for v in pt.values()), sum(v["trials"] for v in pt.values())
                     evals.append([round(s0 / 1e6, 2), round(a / b, 3), round(min(v["success_rate"] for v in pt.values()), 3)])
-    return {"events": {k: round(v, 2) for k, v in ev.items()}, "end": round(s0 / 1e6, 2), "evals": evals}
+                    last = {k: [v["successes"], v["trials"]] for k, v in pt.items()}
+    return {"events": {k: round(v, 2) for k, v in ev.items()}, "end": round(s0 / 1e6, 2), "evals": evals, "last": last}
 
 
 old_ev, old_end, switch = lineage()
@@ -74,7 +75,14 @@ progress = {
     "lean": runs([f"{CROOT}/R397-scratch-lean"]),
     "bands": runs([f"{CR}/R399-progress-b40"]),
     "types_v2": runs([f"{CR}/R400-continuum-types"]),
+    "allpoints": runs([f"{CR}/R401-allpoints-b40"]),
 }
+ap = json.load(open(f"{CR}/R401-allpoints-b40/progress.json"))
+progress["allpoints"].update(status=ap["status"], minutes=round(ap["training_minutes"]))
+pv = json.load(open(f"{CR}/allpoints-b40/manifest.json"))["progress_view"]["table"]
+progress["allpoints_bands"] = {k: {"tau": v["tau"], "rows": v["rows"], "types": v["types"]} for k, v in pv.items()}
+ck = json.load(open(f"{CR}/continuum-wrench/check/check.json"))["results"]["expert"]
+progress["eval_expert"] = {t: round(v["success_rate"], 2) for t, v in ck.items() if isinstance(v, dict) and "success_rate" in v}
 pv = json.load(open(f"{CR}/progress-b40/manifest.json"))["progress_view"]["table"]
 progress["band_table"] = {k: {"tau": v["tau"], "rows": v["rows"], "types": v["types"]} for k, v in pv.items()}
 

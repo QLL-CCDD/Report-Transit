@@ -158,7 +158,7 @@ sec.append(f"""<h2>2 起点分布：补点前、补点后、连续体库第一�
 <li><b>补点前：</b>“张开夹爪往下降”只有一小段，下降途中大部分高度没有起点，从 pregrasp 到合上夹爪之间断开。</li>
 <li><b>补点后：</b>下降段补成了从抓点到 6 cm 高的一整列，但仍然只在抓点正上方一条竖线上，手没有水平偏差，也不倾斜。</li>
 <li><b>连续体库第一版：</b>先采全部点、再按进度分阶段的第一版（螺母离底座 0.15–0.60 m，16 轮专家轨迹，每格 400 行）。点沿着专家的整条路径连续分布，下降、合爪、搬运都带水平偏差和倾斜；搬运段一直铺到螺母附近，扳手摆放和抓法也更多样。代价是同一类起点里的难度跨度变大，而且点更稀（第 3 节）。</li>
-<li><b>全量点库：</b>同一做法放大：螺母离底座放宽到 0.15–0.70 m（旧 v1 库最远到 0.665 m），专家轨迹从 16 轮加到 64 轮（前 16 轮就是第一版那 16 轮），每格 1000 行，偏离路径的宽扰动从 15%×2.0 加到 40%×2.5，共 {AP["total"] if AP else 0} 行。按决定不做逐行专家筛选，所以库里会留下一部分专家也做不完的起点。还没有训练用过。</li>
+<li><b>全量点库：</b>同一做法放大：螺母离底座放宽到 0.15–0.70 m（旧 v1 库最远到 0.665 m），专家轨迹从 16 轮加到 64 轮（前 16 轮就是第一版那 16 轮），每格 1000 行，偏离路径的宽扰动从 15%×2.0 加到 40%×2.5，共 {AP["total"] if AP else 0} 行。按决定不做逐行专家筛选，所以库里会留下一部分专家也做不完的起点。第 4 节用它从零训练。</li>
 </ul>""")
 
 # ================================================================== 3 the two curricula on the all-points bank (stopped)
@@ -177,7 +177,7 @@ if STALL:
     trs = "".join(f"<tr><th>{esc(r[0])}</th><td colspan='2'>{esc(r[1])}</td></tr>" if len(r) == 2 else
                   f"<tr><th>{esc(r[0])}</th><td>{esc(r[1])}</td><td>{esc(r[2])}</td></tr>" for r in rows)
     sec.append(f"""<h2>3 新库上的两种课程：按进度分档 vs 按类型解锁（已停止，未出结论）</h2>
-<p class='lead'>在连续体库第一版上，同时从零训练两条，只有“课程怎么分阶段”不同。两条在“对准螺母、推进”这一步卡了约 5M 步，为了把显卡让给正在建的全量点库，已经停止。这里记录现象和初步判断，还不能比较两种课程的好坏。</p>
+<p class='lead'>在连续体库第一版上，同时从零训练两条，只有“课程怎么分阶段”不同。两条在“对准螺母、推进”这一步卡了约 5M 步，为了把显卡让给正在建的全量点库，已经停止。这里记录现象和初步判断，还不能比较两种课程的好坏。后来全量点库上同配方的一条在同一阶段卡了更久，最终突破（第 4 节）。</p>
 <table class='tt'><tr><th></th><th>按进度分档</th><th>按类型解锁</th></tr>{trs}</table>
 <h3>卡住那一步的训练成功率</h3>
 <p class='lead'>横轴是从零训练的环境步数。两条在 0.5–0.7M 步内都过了推进段（p75–p25），之后停在 aligned（开口对准螺母）和 near（拿着扳手在螺母附近）。灰线是补点后的旧库在同一阶段的曲线作参照：旧库 aligned 在开放后 1.3M 步过线。成功率按最近约 300 个训练回合计算（带探索噪声）。</p>
@@ -208,7 +208,61 @@ if STALL:
 <li>要确认，需要录一批 aligned / near 失败回合，看是对不准、放不平还是时间不够；这一步还没做。</li>
 </ul>""")
 
-# ================================================================== 4 videos
+# ================================================================== 4 from scratch on the all-points bank (R401)
+AR = P.get("allpoints")
+if AR and AR["evals"]:
+    BT = P["allpoints_bands"]
+    NB = len(BT)
+    BCATS = ["b00 开始"] + [f"b{k:02d} 开放" for k in range(1, NB)]
+    def band_ladder(run):
+        ev = sorted((st, int(k[1:])) for k, st in run["events"].items() if k.startswith("b"))
+        pts = [(0, 0)] + [(st, b) for st, b in ev]
+        return pts + [(run["end"], pts[-1][1])]
+    band_rows = "".join(
+        f"<tr><td>{k}</td><td class='num'>{v['tau'][0]}–{v['tau'][1] if int(k[1:]) < NB - 1 else '…'}</td><td class='num'>{v['rows']}</td>"
+        f"<td>{esc('、'.join(f'{t} {n}' for t, n in sorted(v['types'].items(), key=lambda x: -x[1])))}</td>"
+        f"<td>{AR['events'].get(k, '—') if k != 'b00' else 0}</td></tr>" for k, v in BT.items())
+    last, EX = AR["last"], P["eval_expert"]
+    per_rows = "".join(
+        f"<tr><td><span class='dot' style='background:{COLORS[t]}'></span>{t}<div class='sub'>{esc(SHORT[t])}</div></td>"
+        f"<td class='num'>{last[t][0]}/{last[t][1]}</td><td class='num' style='color:{'var(--s3)' if last[t][0] / last[t][1] >= 0.9 else 'var(--critical)'}'>{last[t][0] / last[t][1]:.0%}</td>"
+        f"<td class='num'>{EX.get(t, 0):.0%}</td></tr>" for t in TASK_ORDER if t in last)
+    ev_by = {round(st): a for st, a, _ in AR["evals"]}
+    stall_end = AR["events"].get("b03", AR["end"])
+    pre = [a for st, a, _ in AR["evals"] if st < stall_end]
+    fin = AR["evals"][-1]
+    xmax4 = round(AR["end"] + 8)
+    sec.append(f"""<h2>4 全量点库从零训练：按进度分档（R401）</h2>
+<p class='lead'>用第 3 节按进度分档那一条（R399）的同一套配方，只把起点库换成全量点库（3.7 万行，不做逐行专家筛选），按“离专家完成还剩多少步”每 40 步一档、共 {NB} 档。
+训练时长上限 {AR["minutes"]} 分钟用完后停止，共 {AR["end"]:.1f}M 环境步，<b>没有达标</b>（最后一次评测 {fin[1]:.1%}，最差一类 {fin[2]:.0%}），曲线还在上升。
+评测和第 3 节相同：连续体库第一版，确定性策略，十类起点各约 50 回合。</p>
+<h3>课程开放到第几档</h3>
+<p class='lead'>纵轴是已经开放的最远一档（b00 离完成最近，b{NB-1:02d} 是完整任务开头）。一档里每类起点都过 0.7 才开下一档。</p>
+{legend([("全量点库（R401）", "var(--s2)", False), (f"连续体库第一版（R399，同配方，{bands['end']:.1f}M 步时停止）", "var(--s5)", True)])}
+{chart("c_ap_ladder", [{"name": "全量点库 R401", "color": "var(--s2)", "step": True, "pts": band_ladder(AR)},
+                       {"name": "连续体库第一版 R399", "color": "var(--s5)", "step": True, "dash": True, "pts": band_ladder(bands)}],
+       0, xmax4, -0.5, NB - 0.5, "从零训练的环境步数（百万步）：第 {x} 百万步", cats=BCATS, h=330,
+       vmarks=[(stall_end, "突破对准 / 推进档", "left")])}
+<h3>完整库评测（十类合计，同一评测库）</h3>
+{legend([("全量点库（R401）", "var(--s2)", False), ("连续体库第一版 · 按进度分档（R399）", "var(--s5)", False), ("连续体库第一版 · 按类型解锁（R400）", "var(--s3)", False)])}
+{chart("c_ap_eval", [{"name": "全量点库 R401", "color": "var(--s2)", "dots": True, "pts": [(st, a) for st, a, _ in AR["evals"]]},
+                     {"name": "R399 按进度", "color": "var(--s5)", "dots": True, "pts": [(st, a) for st, a, _ in bands["evals"]]},
+                     {"name": "R400 按类型", "color": "var(--s3)", "dots": True, "pts": [(st, a) for st, a, _ in tv2["evals"]]}],
+       0, xmax4, 0, 1, "从零训练的环境步数（百万步）：第 {x} 百万步", ytick=[0, 0.2, 0.4, 0.6, 0.8, 0.9, 1], hlines=[(0.9, "达标线 0.9")], h=260)}
+<h3>最后一次评测（第 {fin[0]:.1f}M 步）各类成功率</h3>
+<p class='lead'>右列是专家脚本在同一评测库上抽检的成功率，作为参照：评测库里有一部分起点专家也做不完。</p>
+<table class='tt'><tr><th>起点类型</th><th>成功 / 回合</th><th>成功率</th><th>专家（同一评测库）</th></tr>{per_rows}</table>
+<details><summary>各档的范围、行数和开放时刻</summary><table class='tt'><tr><th>档</th><th>离完成还剩（步）</th><th>行数</th><th>包含的起点类型（行数）</th><th>开放时刻（M 步）</th></tr>{band_rows}</table></details>
+<h3>现象</h3>
+<ul>
+<li><b>同样在对准 / 推进档卡住，但卡了更久之后突破了：</b>前三档在 {AR["events"].get("b02", 0):.1f}M 步内开放，之后在 b02（aligned、near、p25）停了约 {stall_end - AR["events"].get("b02", 0):.0f}M 步，期间评测一直在 {min(pre):.0%}–{max(pre):.0%}；第 {stall_end:.0f}M 步突破，随后 b03–b05 在 0.6M 步内连开，评测从约 30% 跳到 60%，之后一路涨到 {max(a for _, a, _ in AR["evals"]):.0%}。</li>
+<li><b>R399 停得太早，不能说明按进度分档学不会：</b>R401 在 7M 步时评测 {ev_by.get(7, pre[-1]):.0%}，和 R399 停止时（{bands["evals"][-1][0]:.1f}M 步，{bands["evals"][-1][1]:.1%}）几乎一样；但两者用的库不同，R399 继续训会不会同样突破，没有验证。</li>
+<li><b>专家做不完的起点，策略不一定做不完：</b>aligned、grasped_far 上策略分别做到 {last["aligned"][0] / last["aligned"][1]:.0%}、{last["grasped_far"][0] / last["grasped_far"][1]:.0%}，专家只有 {EX["aligned"]:.0%}、{EX["grasped_far"]:.0%}。不做逐行专家筛选留下的起点，有不少其实能完成。</li>
+<li><b>还没到 90% 的是抓取段：</b>pregrasp、pick_lift、pick_descend、pick_close；它们大部分落在 b07 以后的档里，b07、b08 在 {AR["events"].get("b07", 0):.0f}M 步才开放，b09–b{NB-1:02d}（多数 pregrasp）到停止时还没开放。</li>
+</ul>
+<p class='cap'>与第 1 节的 v1 库（补点后 + 修正，{full["end"]:.1f}M 步达标）评测库不同，步数不能直接比较。</p>""")
+
+# ================================================================== 5 videos
 by = {v["stage"].split()[0]: v for v in VIDEOS}
 vv = []
 for n in TASK_ORDER:
@@ -217,7 +271,7 @@ for n in TASK_ORDER:
         vv.append(f"""<h3>从 {n} 出发（{esc(SHORT[n])}）</h3><div class='pair'>
 <div><div class='cap'>RL 策略（补点后的库上训练的最终权重）</div><video controls muted loop playsinline preload='metadata' src='{esc(v['rl'])}'></video></div>
 <div><div class='cap'>专家脚本（同一个起点）</div><video controls muted loop playsinline preload='metadata' src='{esc(v['expert'])}'></video></div></div>""")
-sec.append(f"""<h2>4 同一个起点：RL 策略和专家</h2>
+sec.append(f"""<h2>5 同一个起点：RL 策略和专家</h2>
 <p class='lead'>每类起点各一组，左边是 RL 策略，右边是专家脚本，从同一个保存的起点出发。按任务顺序从 pregrasp 开始。视频存在 HF 上，打开时需要联网。</p>
 {''.join(vv)}""")
 
@@ -297,9 +351,9 @@ title = "扳手卡螺母：补点前后的训练与起点分布（issue #90）"
 doc = f"""<!doctype html><html lang="zh"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>{title}</title>
 <style>{style}</style><script>{tipjs}</script><body><div class="viz-root"><h1>{title}</h1>
 <p class='lead'>任务：抓起平放的开口扳手，搬到螺母旁，把开口水平推进去卡住螺母再松手。课程从后往前逐级开放起点，从完整任务起点 pregrasp 出发、在完整起点库上评测十类都 ≥90% 算达标。
-这一页回答：补点前后训练快慢差多少，补点前后起点分布差在哪，新库上的两种课程卡在哪，最终策略做出来是什么样。</p>
+这一页回答：补点前后训练快慢差多少，补点前后起点分布差在哪，新库上的两种课程卡在哪，全量点库上从零训练走到哪一步，最终策略做出来是什么样。</p>
 {''.join(sec)}
-<p class='cap'>科研记录（供追溯）：E-10 下，旧做法 = R353–R390，补点后 + 修正 = R396、R398（接续 R391、R395 另见 PR #114），去掉两档 = R397，先采全部点 = R399（按进度）、R400（按类型）。</p>
+<p class='cap'>科研记录（供追溯）：E-10 下，旧做法 = R353–R390，补点后 + 修正 = R396、R398（接续 R391、R395 另见 PR #114），去掉两档 = R397，先采全部点 = R399（按进度）、R400（按类型），全量点库 = R401；观察记录 O-308–O-313。</p>
 </div><script>{distjs}</script></body></html>"""
 open(OUT, "w").write(doc)
 print(OUT, len(doc))
