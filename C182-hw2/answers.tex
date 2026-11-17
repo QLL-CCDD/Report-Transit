@@ -1,0 +1,284 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,booktabs}
+\usepackage[margin=1in]{geometry}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\pagestyle{plain}
+\begin{document}
+\textbf{1.}
+
+(a)
+\[
+J(w_1,w_2)=\frac12(w_1-2)^2+\frac92(w_2+1)^2\geq0.
+\]
+Equality holds exactly at
+\[
+w^*=\begin{pmatrix}2\\-1\end{pmatrix},\qquad J(w^*)=0.
+\]
+\[
+\nabla J(w^{(t)})=
+\begin{pmatrix}w_1^{(t)}-2\\9(w_2^{(t)}+1)\end{pmatrix}.
+\]
+For $w^{(0)}=(0,0)^\top$ and $\eta=1/5$,
+\[
+\nabla J(w^{(0)})=\begin{pmatrix}-2\\9\end{pmatrix},\qquad
+w^{(1)}=w^{(0)}-\frac15\nabla J(w^{(0)})
+=\begin{pmatrix}2/5\\-9/5\end{pmatrix}.
+\]
+
+(b) The coordinate errors satisfy
+\[
+w_1^{(t+1)}-2=(1-\eta)(w_1^{(t)}-2),\qquad
+w_2^{(t+1)}+1=(1-9\eta)(w_2^{(t)}+1).
+\]
+Convergence from every initial vector requires and is ensured by
+\[
+|1-\eta|<1,\quad |1-9\eta|<1
+\quad\Longleftrightarrow\quad 0<\eta<\frac29.
+\]
+Starting from $(0,0)^\top$,
+\[
+w_1^{(t)}=2-2(1-\eta)^t,\qquad
+w_2^{(t)}=-1+(1-9\eta)^t.
+\]
+For $\eta=1/5$,
+\[
+w_1^{(t)}=2-2(4/5)^t,\qquad
+w_2^{(t)}=-1+(-4/5)^t,\qquad
+J(w^{(t)})=\frac{13}{2}\left(\frac{16}{25}\right)^t\longrightarrow0.
+\]
+The first coordinate increases to $2$; the second oscillates around $-1$
+with decreasing amplitude.
+
+For $\eta=1/4$,
+\[
+w_1^{(t)}=2-2(3/4)^t,\qquad
+w_2^{(t)}=-1+(-5/4)^t,
+\]
+\[
+J(w^{(t)})=2\left(\frac9{16}\right)^t
++\frac92\left(\frac{25}{16}\right)^t\longrightarrow\infty.
+\]
+The first coordinate still converges, but the second oscillates with
+increasing amplitude, so the iterates diverge.
+
+\newpage
+\textbf{2.}
+
+(a) Let $f_k(x)=p(x\mid C_k)$. The likelihood ratio is
+\[
+\frac{f_2(x)}{f_1(x)}
+=\exp\left(-\frac{(x-2)^2}{2}+\frac{x^2}{2}\right)
+=e^{2x-2}.
+\]
+By Bayes' rule,
+\begin{align*}
+P(C_2\mid X=x)
+&=\frac{(2/3)f_2(x)}{(1/3)f_1(x)+(2/3)f_2(x)}\\
+&=\frac{2e^{2x-2}}{1+2e^{2x-2}}
+=\frac{1}{1+e^{-(2x-2+\log2)}}.
+\end{align*}
+At $x=1$,
+\[
+P(C_2\mid X=1)=\frac23>\frac12,
+\]
+so the predicted class is $C_2$.
+
+(b) Under zero-one loss, the decision boundary satisfies
+\[
+\frac{P(C_2\mid x)}{P(C_1\mid x)}=2e^{2x-2}=1.
+\]
+Thus
+\[
+x^*=1-\frac{\log2}{2}\approx0.653426,
+\qquad
+\widehat C(x)=
+\begin{cases}
+C_1,&x<x^*,\\
+C_2,&x>x^*.
+\end{cases}
+\]
+The posterior probabilities tie at $x=x^*$.
+
+With equal priors,
+\[
+\frac{P(C_2\mid x)}{P(C_1\mid x)}=e^{2x-2},\qquad x^*=1.
+\]
+The boundary moves right by $(\log2)/2$: predict $C_1$ for $x<1$ and
+$C_2$ for $x>1$, with a tie at $x=1$.
+
+\newpage
+\textbf{3.}
+
+(a) There are three successes and two failures, so
+\[
+L(\theta)=\theta^3(1-\theta)^2,\qquad
+\log L(\theta)=3\log\theta+2\log(1-\theta).
+\]
+\[
+\frac{d}{d\theta}\log L(\theta)
+=\frac3\theta-\frac2{1-\theta}=0
+\quad\Longrightarrow\quad \widehat\theta_{\mathrm{ML}}=\frac35.
+\]
+For the prior,
+\[
+1=C\int_0^1\theta(1-\theta)^3\,d\theta
+=C\left(\frac12-1+\frac34-\frac15\right)=\frac C{20},
+\qquad C=20.
+\]
+The posterior density satisfies
+\[
+p(\theta\mid D)\propto L(\theta)q(\theta)
+\propto\theta^4(1-\theta)^5.
+\]
+Hence
+\[
+\frac{d}{d\theta}\log p(\theta\mid D)
+=\frac4\theta-\frac5{1-\theta}=0
+\quad\Longrightarrow\quad \widehat\theta_{\mathrm{MAP}}=\frac49.
+\]
+Both log objectives have strictly negative second derivatives on $(0,1)$,
+so these are their unique maxima.
+
+(b) The implemented objective is
+\begin{align*}
+J(\theta)
+&=-\frac15\bigl(3\log\theta+2\log(1-\theta)\bigr)
+-\log20-\log\theta-3\log(1-\theta)\\
+&=-\frac85\log\theta-\frac{17}{5}\log(1-\theta)-\log20.
+\end{align*}
+\[
+J'(\theta)=-\frac8{5\theta}+\frac{17}{5(1-\theta)}=0
+\quad\Longrightarrow\quad \widehat\theta=\frac8{25}.
+\]
+Since
+\[
+J''(\theta)=\frac8{5\theta^2}+\frac{17}{5(1-\theta)^2}>0,
+\]
+this is the unique minimum, and $8/25\ne4/9$.
+
+To recover the MAP estimate with the averaged likelihood, use
+\[
+J_{\mathrm{MAP}}(\theta)
+=-\frac15\sum_{i=1}^5\log p(y_i\mid\theta)-\frac15\log q(\theta)
+=-\frac15\log\bigl(L(\theta)q(\theta)\bigr).
+\]
+Thus the prior term must also be divided by $5$.
+
+\newpage
+\textbf{4.}
+
+(a) At $x=\log2$,
+\[
+a=(\log2,-\log2,0)^\top,\qquad
+\bigl(e^{a_1},e^{a_2},e^{a_3}\bigr)=(2,1/2,1).
+\]
+\[
+(p_1,p_2,p_3)=\left(\frac47,\frac17,\frac27\right),\qquad
+\widehat y=1,\qquad \ell(a,3)=-\log\frac27=\log\frac72.
+\]
+For arbitrary scores and label $y$,
+\[
+\ell(a,y)=-a_y+\log\left(\sum_{k=1}^3e^{a_k}\right).
+\]
+Therefore
+\[
+\frac{\partial\ell}{\partial a_j}
+=-\mathrm{I}[j=y]+\frac{e^{a_j}}{\sum_{k=1}^3e^{a_k}}
+=p_j-\mathrm{I}[j=y].
+\]
+
+(b) For any constant $c$,
+\[
+p_k(a+c\mathbf1)
+=\frac{e^{a_k+c}}{\sum_j e^{a_j+c}}
+=\frac{e^ce^{a_k}}{e^c\sum_j e^{a_j}}
+=p_k(a).
+\]
+Consequently,
+\[
+\ell(a+c\mathbf1,y)=-\log p_y(a+c\mathbf1)
+=-\log p_y(a)=\ell(a,y).
+\]
+For $a=(1000,1001,999)^\top$, subtract $\max_j a_j=1001$:
+\[
+b=a-1001\mathbf1=(-1,0,-2)^\top,\qquad
+D=e^{-1}+1+e^{-2}.
+\]
+\[
+(p_1,p_2,p_3)=\frac{(e^{-1},1,e^{-2})}{D}
+\approx(0.244728,0.665241,0.090031).
+\]
+\[
+\ell(a,3)=-\log\frac{e^{-2}}D
+=2+\log D\approx2.407606.
+\]
+Only nonpositive scores are exponentiated.
+
+\newpage
+\textbf{5.}
+
+(a) For either class $y\in\{0,1\}$,
+\[
+P(X_1=0\mid y)=P(X_1=1\mid y)
+=P(X_2=0\mid y)=P(X_2=1\mid y)=\frac12.
+\]
+For every input $(x_1,x_2)$, the Naive Bayes scores are
+\[
+P(Y=y)P(X_1=x_1\mid y)P(X_2=x_2\mid y)
+=\frac12\cdot\frac12\cdot\frac12=\frac18.
+\]
+Thus both estimated posteriors equal $1/2$. The tie rule gives
+$\widehat Y_{\mathrm{NB}}=0$ at all four inputs, and
+\[
+P(\widehat Y_{\mathrm{NB}}\ne Y)=P(Y=1)=\frac12.
+\]
+Using the joint distributions instead,
+\[
+P(Y=1\mid x_1,x_2)
+=\frac{P(x_1,x_2\mid Y=1)}
+{P(x_1,x_2\mid Y=0)+P(x_1,x_2\mid Y=1)}.
+\]
+\[
+\begin{array}{c|c|c|c}
+\toprule
+(x_1,x_2)&P(Y=1\mid x_1,x_2)&\widehat Y_{\mathrm{NB}}&\widehat Y_{\mathrm{joint}}\\
+\midrule
+(0,0)&1/5&0&0\\
+(0,1)&4/5&0&1\\
+(1,0)&4/5&0&1\\
+(1,1)&1/5&0&0\\
+\bottomrule
+\end{array}
+\]
+The joint classifier has error
+\begin{align*}
+P(\widehat Y_{\mathrm{joint}}\ne Y)
+&=\frac12P(X_1\ne X_2\mid Y=0)
++\frac12P(X_1=X_2\mid Y=1)\\
+&=\frac12(0.1+0.1)+\frac12(0.1+0.1)=\frac15.
+\end{align*}
+
+(b) For $Z=\mathrm{I}[X_1\ne X_2]$,
+\[
+P(Z=1\mid Y=0)=\frac15,\quad P(Z=1\mid Y=1)=\frac45,
+\qquad P(Z=0)=P(Z=1)=\frac12.
+\]
+Hence
+\[
+P(Y=1\mid Z=z)=
+\begin{cases}
+1/5,&z=0,\\
+4/5,&z=1.
+\end{cases}
+\]
+The classifier predicts $\widehat Y=Z$ and has error
+\[
+P(\widehat Y\ne Y)=\frac12\cdot\frac15+\frac12\cdot\frac15=\frac15.
+\]
+More data cannot improve the original classifier with the stipulated exact
+marginals: both classes already have identical single-feature distributions.
+The discriminative information lies in the dependence between $X_1$ and $X_2$,
+which the conditional-independence model discards. The feature $Z$ retains it.
+\end{document}
