@@ -1,0 +1,96 @@
+<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width'><title>海绵擦砧板：建库现状与完整任务视频（a2r #242）</title>
+<style>
+:root{color-scheme:light;--bg:#fcfcfb;--card:#f1f0ec;--t:#0b0b0b;--t2:#52514e;--grid:#e3e2dd;--acc:#2a78d6;--bad:#d03b3b;--good:#0ca30c}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#1a1a19;--card:#252523;--t:#f0efec;--t2:#c3c2b7;--grid:#3a3a37;--acc:#3987e5}}
+body{margin:0;background:var(--bg);color:var(--t);font:14px/1.65 -apple-system,'PingFang SC','Microsoft YaHei',sans-serif}
+main{max-width:1200px;margin:0 auto;padding:20px 24px 60px}
+h1{font-size:22px;margin:4px 0 8px}h2{font-size:18px;margin:32px 0 8px;border-bottom:1px solid var(--grid);padding-bottom:4px}h3{font-size:15px;margin:18px 0 6px}
+.lead{color:var(--t2)}
+table{border-collapse:collapse;margin:8px 0;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--grid);padding:4px 10px;text-align:left}th{background:var(--card)}
+td.n{text-align:right}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px}
+figure{margin:0;background:var(--card);border-radius:8px;padding:8px}
+figure video,figure img{width:100%;border-radius:4px;display:block}
+figcaption{font-size:13px;color:var(--t2);margin-top:4px}
+code{background:var(--card);padding:0 4px;border-radius:3px;font-size:12.5px}
+.warn{border-left:4px solid var(--bad);padding:4px 12px;background:var(--card)}
+.note{border-left:4px solid var(--acc);padding:4px 12px;background:var(--card)}
+</style>
+<main>
+<h1>海绵擦砧板：建库现状与完整任务视频</h1>
+<p class="lead">对应 a2r issue #242（E-10 专家修复：海绵擦砧板，松手穿板复现，等待共享 Release 决策）。2026-11-24 整理，仓库基线 main <code>d134c7aef</code>。</p>
+
+<h2>1. 任务是什么</h2>
+<p>单臂 Piper X 从桌面抓起海绵，压在砧板上来回擦，把砧板表面的污渍格擦掉，最后松手、抬手离开。成功判定看三项：污渍擦除比例、海绵已松开、物体静止。专家按规格里的原语依次执行：</p>
+<p><code>approach</code> 接近 → <code>descend</code> 下探 → <code>close</code> 闭爪 → <code>lift</code> 抬起 → <code>object_move</code> 持物搬到砧板 → <code>surface_wipe</code> 按栅格压着擦 → <code>release</code> 张手 → <code>tcp_move</code> 抬手离开。</p>
+<figure><img src="videos/frozen_env5_sheet.jpg" alt="关键帧"><figcaption>冻结原版专家第 5 号回合的关键帧，依次为第 0、120、240、400、600、769 步（30 Hz）。左为场景视角，右为砧板俯视图，深色格是未擦净的污渍。</figcaption></figure>
+
+<h2>2. 现行起点库</h2>
+<table>
+<tr><th>项</th><th>值</th></tr>
+<tr><td>路径</td><td><code>Shiki42/a2r-e10-reset-banks@3a9f3f79</code> : <code>all-stages-20261104/wipe_cutting_board_with_sponge/filter-1</code></td></tr>
+<tr><td>来源</td><td><code>configs/reset_banks/latest.yaml</code>（每题唯一现行库）</td></tr>
+<tr><td>建库</td><td>节点 d，Isaac 5.1，物理 d6，代码 <code>9f9a0347</code>，Run R315（2026-11-03 用户接受污渍设计后重建）</td></tr>
+<tr><td>采样方案</td><td><b>v1</b>（按阶段配额；manifest 无 <code>reset_scheme</code> 字段）</td></tr>
+<tr><td>各类条数</td><td>pregrasp 3000 · p25 1000 · p50 864 · p75 923</td></tr>
+<tr><td>规格验收（status）</td><td>宽范围 301/312 有效起点成功；建库冒烟 40 条无缺类；verdict = review</td></tr>
+<tr><td>v2 重建</td><td>R368 已登记（v2 全量重建 T1–T11 计划），<b>状态 planned，尚未开始</b></td></tr>
+<tr><td>策略训练</td><td>尚无。展示页记录 Coder B 的 Isaac 6.0.1 跑不了这题</td></tr>
+</table>
+
+<h3>已有的视频（2026-11-07，与现行库对应）</h3>
+<div class="grid">
+<figure><video src="videos/bank_starts_20261107.mp4" controls preload="metadata"></video><figcaption>起点库渲染：pregrasp / p25 / p50 / p75 四类起点叠影（d，Isaac 5.1，seed 31001）。HF demos <code>50922584</code></figcaption></figure>
+<figure><video src="videos/rl_input_points_20261107.mp4" controls preload="metadata"></video><figcaption>RL 输入点云：海绵 96、砧板 128、两指各 16、污渍 64，共 320 点。HF demos <code>2fd03e02</code></figcaption></figure>
+</div>
+<p class="note">HF 上还有 2026-10-27 的 scout 专家视频，但那是改成“擦污渍”前的旧定义（物理、初始化、成功条件都已变），不代表现行专家，所以这里不再引用。</p>
+
+<h2>3. 新录：现行专家的完整任务（2026-11-24）</h2>
+<p>在节点 f 上用 <code>tasks validate --steps videos</code> 跑 scout，物理 d7，seed 853，每版 8 个环境，从规格起点（pregrasp）一直到松手离开。两版专家：</p>
+<ul>
+<li><b>冻结原版</b> <code>d767eb0e</code>：这题的专家、规格与当前 main 行为一致（main 只多了 status 注释）。</li>
+<li><b>空手提速版</b> <code>70cb26af1</code>（PR #203 分支上的候选）：空手远段提速、轴向前视 8 mm，issue 里自然 Home 成功率 261→303/311 的那一版。</li>
+</ul>
+<table>
+<tr><th>env</th><th>冻结原版 步数</th><th>提速版 步数</th><th>结局</th></tr>
+<tr><td>0</td><td class="n">551</td><td class="n">504</td><td>均成功</td></tr>
+<tr><td>1</td><td class="n">–</td><td class="n">–</td><td>起点被筛掉（两版都无效）</td></tr>
+<tr><td>2</td><td class="n">683</td><td class="n">628</td><td>均成功</td></tr>
+<tr><td>3</td><td class="n">637</td><td class="n">590</td><td>均成功</td></tr>
+<tr><td>4</td><td class="n">617</td><td class="n">632</td><td>均成功</td></tr>
+<tr><td>5</td><td class="n">769</td><td class="n">731</td><td>均成功</td></tr>
+<tr><td>6</td><td class="n">734</td><td class="n">663</td><td>均成功</td></tr>
+<tr><td>7</td><td class="n">562</td><td class="n">510</td><td>均成功</td></tr>
+<tr><th>合计</th><th>7/7 成功，平均 650 步（21.7 s）</th><th>7/7 成功，平均 608 步（20.3 s）</th><th></th></tr>
+</table>
+<p>这 8 个起点上两版都没出现松手穿板。该失败在宽范围里大约只占 1%（307 个有效起点中 2–3 个），8 段视频碰不到很正常。起点是 pregrasp，提速版对空手远段的加速在这里体现得不多；从自然 Home 出发时差别更大（见第 4 节）。</p>
+
+<div class="grid">
+<figure><video src="videos/side_by_side_env5.mp4" controls preload="metadata"></video><figcaption>同一起点 env 5 并排：左冻结原版 769 步，右提速版 731 步（结束后定格 5 s）</figcaption></figure>
+<figure><video src="videos/frozen195_env5.mp4" controls preload="metadata"></video><figcaption>冻结原版 env 5，769 步，成功</figcaption></figure>
+<figure><video src="videos/frozen195_env0.mp4" controls preload="metadata"></video><figcaption>冻结原版 env 0，551 步，成功</figcaption></figure>
+<figure><video src="videos/sponge-70cb26af1_env0.mp4" controls preload="metadata"></video><figcaption>提速版 env 0，504 步，成功</figcaption></figure>
+<figure><video src="videos/sponge-70cb26af1_env5.mp4" controls preload="metadata"></video><figcaption>提速版 env 5，731 步，成功</figcaption></figure>
+</div>
+<p>这里只放了压缩后的 5 段（640 宽，crf 30）。16 段 1280×720 原件，以及两版的 <code>validate.md</code> 和 <code>result.json</code>，留在 f：<code>bozhao@100.127.75.5:~/sponge-video-20261124/{frozen195,sponge-70cb26af1}/videos/full/</code>。</p>
+
+<h2>4. Issue #242 目前进度</h2>
+<p>开发种子 853/854，物理 d7，900 步上限，每个种子 192 个提案。</p>
+<table>
+<tr><th>版本</th><th>自然 Home（共同可行 311）</th><th>宽范围（共同有效 307）</th></tr>
+<tr><td>冻结原版 <code>d767eb0e</code></td><td class="n">261（83.9%），p95 ∞</td><td class="n">304</td></tr>
+<tr><td>空手提速 <code>70cb26af1</code></td><td class="n">303（97.4%），p95 847 步</td><td class="n">303（挽回 2，损失 3）</td></tr>
+<tr><td>实宽预松 <code>8cfa4ab07</code></td><td>未测</td><td class="n">303（相对父版挽回 853:25、72，新增损失 853:34、854:69）</td></tr>
+</table>
+<h3>卡在哪里</h3>
+<p class="warn">海绵已经擦净（140/140、147/147 格），但共享 <code>Release</code> 原语一张手，到全张开的第一帧（指间距 78.5 mm），海绵一角就压进砧板 3.0–3.3 mm，越过 −3 mm 穿板否决线；之后回合在 <code>TcpMove</code> 超时。慢开爪、擦完先抬 5 mm、按海绵实宽预松都试过：前两个失败摆位修好了，又在另外两个摆位上出现同样的问题。</p>
+<p>判断：边界在冻结的共享 <code>Release</code> 原语，单题专家参数已经调不动，PR #203 保持草稿。是否让 <code>Release</code> 按接触力反馈逐步卸载，由主管在 29 题建库结束后决定（O-375）。如获批，先用 853:25、72、34 和 854:69 四个穿板摆位核对松手时的夹宽、海绵相对板面的运动和接触力，再做全量宽范围、防退化检查和独立 Home 验收。</p>
+
+<h3>证据入口</h3>
+<ul>
+<li>最终记录 O-375：<a href="https://github.com/Shiki42/a2r/blob/2c495e78cf2e52d3c47716a054817c23b81f1a4d/research/experiments/E-10/analysis/O-375.md">2c495e78</a>；Home 与宽范围配对 O-373：<a href="https://github.com/Shiki42/a2r/blob/3fb6538cccca193d1242fe6d20aa044e0c65fb58/research/experiments/E-10/analysis/O-373.md">3fb6538c</a>；逐帧几何：<a href="https://github.com/Shiki42/a2r/blob/3e5ffe3dc4333746768499ac62d13e93dc25228d/evidence/sponge-width-853/conclusion.md">3e5ffe3d</a></li>
+<li>原件：f <code>~/e10-expert-c88887/sponge641/</code>，冻结对照在 <code>inputs853/baseline/wide</code>，两版候选在 <code>out/sponge-70cb26af1-seed853</code>、<code>out/sponge-8cfa4ab07-wide853</code></li>
+<li>PR #203：分支 <code>e10/sponge-home-review</code>（草稿）；实宽版分支 <code>e10/sponge-unload-at-width</code></li>
+</ul>
+</main>
