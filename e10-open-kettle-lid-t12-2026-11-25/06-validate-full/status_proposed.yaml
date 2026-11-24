@@ -1,0 +1,65 @@
+status:
+  updated: '2026-11-25'
+  machine: machine
+  commit: 1c8e1a368cca2d9b81193eff75471d22582ca61c
+  physics: d7
+  isaac: 5.1.0.0
+  validate_dir: /home/zhaobo/e10-kettle-lid-t12-20261124/validate/1c8e1a36
+  verdict: review
+  keyframe_check:
+    chain_ok: 32
+    staged: 32
+  nominal:
+    success: 64
+    valid: 64
+    proposals: 64
+  wide:
+    success: 99
+    valid: 104
+    proposals: 384
+    seeds: 1,2,3
+    num_envs: 128
+    success_covers:
+      x:
+      - 0.0010814255801960826
+      - 0.1923661082983017
+      y:
+      - -0.3464494049549103
+      - 0.18544094264507294
+      yaw_rad:
+      - -3.095236301422119
+      - 3.1280603408813477
+    coverage:
+      frame: kettle.button
+      area: 0.1906
+      yaw: 0.8982
+      successes: 99
+      top_rejects:
+      - at: k_back
+        n: 236
+      - at: 链外（工作区 / 门禁）
+        n: 44
+  home:
+    proposals: 192
+    valid: 37
+    success: 37
+    failed: 0
+    timeout: 0
+    p95_steps: 579
+    p95_seconds: 19.3
+    collection_round_seeds:
+    - 100003
+    - 100004
+    - 100005
+  heldout: no held-out instances
+  bank_smoke:
+    entries: 40
+    missing_types: []
+  preflight:
+    assets: true
+    footprint: true
+    goal: null
+    carry: null
+  open:
+  - Home 可行数低于物理有效数的 25%，复查 64×64 次尝试下的可采轨迹数。
+  - 没有留出实例：留出集只能换 seed，不说明泛化（build-reset-bank.md §2）。

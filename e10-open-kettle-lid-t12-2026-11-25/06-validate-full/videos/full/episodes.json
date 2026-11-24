@@ -1,0 +1,586 @@
+{
+  "commit": null,
+  "dirty": null,
+  "identity": {
+    "task": "open_kettle_lid",
+    "spec_path": "/home/zhaobo/e10-kettle-lid-t12-20261124/repo-1c8e1a36/a2r/benchmark/contact_rl/configs/tasks/kitchen/open_kettle_lid.yaml",
+    "frozen_hash": "92ea726f79df0314b4b45736a49bc9224a39b1d845c1daf6c9aad8d3183b2001",
+    "physics": "d7",
+    "physics_hash": "e1a89cb1402aa3aabe1c679e8ecc6f153e8c59cc52bcde4afe9670c92ca232af",
+    "schema": "contact_task/v1",
+    "interfaces_version": 1,
+    "impl": "spec",
+    "view_digest": "a706e8462cf4aa0c5d9ba60d447cd2e2dd76073e44f46b389b84fd8d5eb0e9cd",
+    "collision_digest": "e13af3139f7a7a468202e0480c2cc28aa90ec5bf12a20912eb32756c55c134c6"
+  },
+  "start_kind": "pregrasp",
+  "control_hz": 30.0,
+  "max_episode_steps": 1350,
+  "policy": "expert",
+  "articulated": {
+    "kettle": {
+      "base": "free",
+      "joints": {
+        "lid": {
+          "usd_joint": "joint_sm_kitchenware_kettle_n01_lid_joint_00",
+          "type": "revolute",
+          "stiffness": 0.0,
+          "damping": 0.0,
+          "armature": 0.0,
+          "max_effort": 0.0,
+          "friction_static": 0.0,
+          "friction_dynamic": 0.0,
+          "friction_viscous": 0.0,
+          "limits": [
+            -1.2217304706573486,
+            0.0
+          ],
+          "physx_limits": [
+            -1.2217304706573486,
+            0.0
+          ],
+          "overridden": {}
+        },
+        "button": {
+          "usd_joint": "joint_sm_kitchenware_kettle_n01_button_joint_00",
+          "type": "prismatic",
+          "stiffness": 1000.0,
+          "damping": 2.0,
+          "armature": 0.0,
+          "max_effort": 3.0,
+          "friction_static": 0.0,
+          "friction_dynamic": 0.0,
+          "friction_viscous": 0.0,
+          "limits": [
+            -0.002314433455467224,
+            -0.0003144294023513794
+          ],
+          "physx_limits": [
+            -0.002314433455467224,
+            -0.0003144294023513794
+          ],
+          "overridden": {
+            "stiffness": 1000,
+            "damping": 2
+          }
+        },
+        "switch": {
+          "usd_joint": "joint_sm_kitchenware_kettle_n01_switch_joint_00",
+          "type": "revolute",
+          "stiffness": 0.0,
+          "damping": 0.0,
+          "armature": 0.0,
+          "max_effort": 0.0,
+          "friction_static": 0.0,
+          "friction_dynamic": 0.0,
+          "friction_viscous": 0.0,
+          "limits": [
+            -0.1745329201221466,
+            0.0
+          ],
+          "physx_limits": [
+            -0.1745329201221466,
+            0.0
+          ],
+          "overridden": {}
+        }
+      },
+      "parts": {
+        "button": {
+          "link": "sm_kitchenware_kettle_n01_button_obj_00",
+          "pos": [
+            0,
+            0,
+            0.0045
+          ],
+          "approach": [
+            0,
+            0,
+            -1
+          ],
+          "closing": [
+            1,
+            0,
+            0
+          ],
+          "closing_symmetry": false
+        }
+      },
+      "links": [
+        "sm_kitchenware_kettle_n01_body_obj_01",
+        "sm_kitchenware_kettle_n01_switch_obj_00",
+        "sm_kitchenware_kettle_n01_button_obj_00",
+        "sm_kitchenware_kettle_n01_lid_obj_00"
+      ],
+      "dof_names": [
+        "joint_sm_kitchenware_kettle_n01_switch_joint_00",
+        "joint_sm_kitchenware_kettle_n01_button_joint_00",
+        "joint_sm_kitchenware_kettle_n01_lid_joint_00"
+      ],
+      "mechanisms": {
+        "lid_release": {
+          "trigger_joint": "button",
+          "trigger_position": -0.0015,
+          "trigger_direction": -1,
+          "trigger_rest_position": -0.00031443,
+          "trigger_part": "button",
+          "trigger_distance_m": 0.04,
+          "trigger_hold_s": 0.02,
+          "joint": "lid",
+          "closed": {
+            "position": 0,
+            "stiffness": 30,
+            "damping": 0.2,
+            "max_effort": 1
+          },
+          "released": {
+            "position": -1.0471975511965976,
+            "stiffness": 0.4,
+            "damping": 0.03,
+            "max_effort": 0.25
+          }
+        }
+      },
+      "mechanism_triggered": {
+        "lid_release": [
+          false,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          false
+        ]
+      },
+      "mechanism_drive_readback": {
+        "lid_release": {
+          "stiffness": [
+            30.0,
+            0.4000000059604645,
+            30.0,
+            0.4000000059604645,
+            30.0,
+            30.0,
+            0.4000000059604645,
+            30.0
+          ],
+          "damping": [
+            0.20000000298023224,
+            0.029999999329447746,
+            0.20000000298023224,
+            0.029999999329447746,
+            0.20000000298023224,
+            0.20000000298023224,
+            0.029999999329447746,
+            0.20000000298023224
+          ],
+          "effort_limits": [
+            [
+              0.0,
+              3.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0,
+              0.25
+            ],
+            [
+              0.0,
+              3.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0,
+              0.25
+            ],
+            [
+              0.0,
+              3.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0,
+              0.25
+            ],
+            [
+              0.0,
+              3.0,
+              1.0
+            ]
+          ],
+          "position_targets": [
+            [
+              -0.1745329201221466,
+              -0.000314430013531819,
+              0.0
+            ],
+            [
+              -0.1745329201221466,
+              -0.000314430013531819,
+              -1.0471975803375244
+            ],
+            [
+              -0.1745329201221466,
+              -0.000314430013531819,
+              0.0
+            ],
+            [
+              -0.1745329201221466,
+              -0.000314430013531819,
+              -1.0471975803375244
+            ],
+            [
+              -0.1745329201221466,
+              -0.000314430013531819,
+              0.0
+            ],
+            [
+              -0.1745329201221466,
+              -0.000314430013531819,
+              0.0
+            ],
+            [
+              -0.1745329201221466,
+              -0.000314430013531819,
+              -1.0471975803375244
+            ],
+            [
+              -0.1745329201221466,
+              -0.000314430013531819,
+              0.0
+            ]
+          ],
+          "button_stiffness": [
+            1000.0,
+            1000.0,
+            1000.0,
+            1000.0,
+            1000.0,
+            1000.0,
+            1000.0,
+            1000.0
+          ]
+        }
+      }
+    }
+  },
+  "masses_kg": {
+    "table": [
+      1.0
+    ]
+  },
+  "articulated_masses_kg": {
+    "kettle": {
+      "sm_kitchenware_kettle_n01_body_obj_01": 0.9971622824668884,
+      "sm_kitchenware_kettle_n01_switch_obj_00": 0.003555783536285162,
+      "sm_kitchenware_kettle_n01_button_obj_00": 0.0013577671488747,
+      "sm_kitchenware_kettle_n01_lid_obj_00": 0.040711067616939545
+    }
+  },
+  "robot_usd": {
+    "path": "/home/zhaobo/contact_rl/piperx_pads_camera075_box_v1/piperx_pads.usd",
+    "physics_layer_sha256": "0817eabaf9c1be7dd5a971b47eeb402efba09ff259580e6cc1789199fad61342"
+  },
+  "seconds_sim_process": 19.5,
+  "render_layout": {
+    "version": 1,
+    "cycle_codes": [
+      0
+    ],
+    "min_num_envs": 1,
+    "source_env_codes": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "source_num_envs": 8,
+    "instance_split": "train",
+    "custom_instances": null,
+    "slots": [
+      {
+        "name": "table",
+        "usd_paths": [
+          "/home/zhaobo/contact_rl/factory/kitchen-c/s1-support-r1/kitchen.table.procedural_worktop.std/object.usda"
+        ],
+        "instance_ids": [
+          "runtime:factory/kitchen-c/s1-support-r1/kitchen.table.procedural_worktop.std/object.usda"
+        ],
+        "source_instances": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "episodes": [
+    {
+      "env": 0,
+      "valid": false,
+      "start_type": "pregrasp",
+      "success": false,
+      "failure": false,
+      "veto_on_success": false,
+      "timeout": false,
+      "steps": -1,
+      "seconds_sim": null,
+      "gate": {
+        "pos_range_m": 0.0,
+        "rot_range_deg": 6.361109437179021e-15,
+        "in_hand_m": 0.0,
+        "held": 0.0
+      },
+      "terms_at_end": null,
+      "expert_failure": null,
+      "joints_final": {
+        "kettle.lid": -3.569794237989754e-09,
+        "kettle.button": -0.0003277391369920224,
+        "kettle.switch": -0.1745329201221466
+      },
+      "expert_at_end": null,
+      "outcome_note": null,
+      "waypoint_ik": {}
+    },
+    {
+      "env": 1,
+      "valid": true,
+      "start_type": "pregrasp",
+      "success": true,
+      "failure": false,
+      "veto_on_success": false,
+      "timeout": false,
+      "steps": 239,
+      "seconds_sim": 7.97,
+      "gate": {
+        "pos_range_m": 0.0,
+        "rot_range_deg": 8.013266259039847e-16,
+        "in_hand_m": 0.0,
+        "held": 0.0
+      },
+      "terms_at_end": {
+        "opened": true,
+        "released": true,
+        "settled": true,
+        "upright": true,
+        "base_still": true,
+        "button_triggered": true,
+        "success_now": true
+      },
+      "expert_failure": "none",
+      "joints_final": {
+        "kettle.lid": -1.0240123271942139,
+        "kettle.button": -0.00032773581915535033,
+        "kettle.switch": -0.1745329201221466
+      },
+      "expert_at_end": {
+        "index": 3,
+        "primitive": "Release"
+      },
+      "outcome_note": null,
+      "waypoint_ik": {}
+    },
+    {
+      "env": 2,
+      "valid": false,
+      "start_type": "pregrasp",
+      "success": false,
+      "failure": false,
+      "veto_on_success": false,
+      "timeout": false,
+      "steps": -1,
+      "seconds_sim": null,
+      "gate": {
+        "pos_range_m": 2.2351741790771484e-08,
+        "rot_range_deg": 0.0,
+        "in_hand_m": 1.5098128969270874e-08,
+        "held": 0.0
+      },
+      "terms_at_end": null,
+      "expert_failure": null,
+      "joints_final": {
+        "kettle.lid": -3.576487994649824e-09,
+        "kettle.button": -0.0003277387877460569,
+        "kettle.switch": -0.1745329350233078
+      },
+      "expert_at_end": null,
+      "outcome_note": null,
+      "waypoint_ik": {}
+    },
+    {
+      "env": 3,
+      "valid": true,
+      "start_type": "pregrasp",
+      "success": true,
+      "failure": false,
+      "veto_on_success": false,
+      "timeout": false,
+      "steps": 239,
+      "seconds_sim": 7.97,
+      "gate": {
+        "pos_range_m": 0.0,
+        "rot_range_deg": 2.6419670826603216e-14,
+        "in_hand_m": 0.0,
+        "held": 0.0
+      },
+      "terms_at_end": {
+        "opened": true,
+        "released": true,
+        "settled": true,
+        "upright": true,
+        "base_still": true,
+        "button_triggered": true,
+        "success_now": true
+      },
+      "expert_failure": "none",
+      "joints_final": {
+        "kettle.lid": -1.024012804031372,
+        "kettle.button": -0.0003277376526966691,
+        "kettle.switch": -0.1745329201221466
+      },
+      "expert_at_end": {
+        "index": 3,
+        "primitive": "Release"
+      },
+      "outcome_note": null,
+      "waypoint_ik": {}
+    },
+    {
+      "env": 4,
+      "valid": false,
+      "start_type": "pregrasp",
+      "success": false,
+      "failure": false,
+      "veto_on_success": false,
+      "timeout": false,
+      "steps": -1,
+      "seconds_sim": null,
+      "gate": {
+        "pos_range_m": 0.0,
+        "rot_range_deg": 0.0,
+        "in_hand_m": 3.145885685285066e-08,
+        "held": 0.0
+      },
+      "terms_at_end": null,
+      "expert_failure": null,
+      "joints_final": {
+        "kettle.lid": -3.5713627610789445e-09,
+        "kettle.button": -0.00032773695420473814,
+        "kettle.switch": -0.1745329201221466
+      },
+      "expert_at_end": null,
+      "outcome_note": null,
+      "waypoint_ik": {}
+    },
+    {
+      "env": 5,
+      "valid": false,
+      "start_type": "pregrasp",
+      "success": false,
+      "failure": false,
+      "veto_on_success": false,
+      "timeout": false,
+      "steps": -1,
+      "seconds_sim": null,
+      "gate": {
+        "pos_range_m": 0.0,
+        "rot_range_deg": 1.7991933558779948e-14,
+        "in_hand_m": 0.0,
+        "held": 0.0
+      },
+      "terms_at_end": null,
+      "expert_failure": null,
+      "joints_final": {
+        "kettle.lid": -3.5709368795266982e-09,
+        "kettle.button": -0.00032773474231362343,
+        "kettle.switch": -0.1745329350233078
+      },
+      "expert_at_end": null,
+      "outcome_note": null,
+      "waypoint_ik": {}
+    },
+    {
+      "env": 6,
+      "valid": true,
+      "start_type": "pregrasp",
+      "success": true,
+      "failure": false,
+      "veto_on_success": false,
+      "timeout": false,
+      "steps": 239,
+      "seconds_sim": 7.97,
+      "gate": {
+        "pos_range_m": 0.0,
+        "rot_range_deg": 6.361109437179021e-15,
+        "in_hand_m": 0.0,
+        "held": 0.0
+      },
+      "terms_at_end": {
+        "opened": true,
+        "released": true,
+        "settled": true,
+        "upright": true,
+        "base_still": true,
+        "button_triggered": true,
+        "success_now": true
+      },
+      "expert_failure": "none",
+      "joints_final": {
+        "kettle.lid": -1.0240179300308228,
+        "kettle.button": -0.00032773794373497367,
+        "kettle.switch": -0.1745329201221466
+      },
+      "expert_at_end": {
+        "index": 3,
+        "primitive": "Release"
+      },
+      "outcome_note": null,
+      "waypoint_ik": {}
+    },
+    {
+      "env": 7,
+      "valid": false,
+      "start_type": "pregrasp",
+      "success": false,
+      "failure": false,
+      "veto_on_success": false,
+      "timeout": false,
+      "steps": -1,
+      "seconds_sim": null,
+      "gate": {
+        "pos_range_m": 0.0,
+        "rot_range_deg": 8.995966779389974e-15,
+        "in_hand_m": 0.0,
+        "held": 0.0
+      },
+      "terms_at_end": null,
+      "expert_failure": null,
+      "joints_final": {
+        "kettle.lid": -3.577104168428491e-09,
+        "kettle.button": -0.00032773654675111175,
+        "kettle.switch": -0.1745329201221466
+      },
+      "expert_at_end": null,
+      "outcome_note": null,
+      "waypoint_ik": {}
+    }
+  ]
+}
