@@ -1,0 +1,14 @@
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/root-3101/home.log:[03:16:46] DIAG after place: kettle root x mean 0.4300 vs placed 0.4300; table placed x mean 0.4300; origins x mean 0.0000 y 0.0000
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/root-3101/home.log:[03:16:50] keyframe filter: chain feasible 7/64 staged starts; rejected at {'k_back': 57}, why [('ik', 57)]
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/root-3101/home.log:[03:16:50] DIAG after settle: kettle root x mean 0.4987 (placed 0.4300), max |root-placed| 0.0744; table x mean 0.4300 (placed 0.4300); origins x mean 0.0000
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/root-3101/home.log:[03:16:50] DIAG home placement: drawn dx mean 0.1150 min 0.0043 max 0.2183; placed kettle x mean 0.4300 min 0.3193; settled button x mean 0.4963 min 0.3149
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/root-3101/home.log:[03:17:18] DIAG after place: kettle root x mean 0.4376 vs placed 0.4376; table placed x mean 0.4376; origins x mean 0.0000 y 0.0000
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/root-3101/home.log:[03:17:21] keyframe filter: chain feasible 21/64 staged starts; rejected at {'k_back': 43}, why [('ik', 43)]
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/root-3101/home.log:[03:17:21] DIAG after settle: kettle root x mean 0.4404 (placed 0.4376), max |root-placed| 0.0225; table x mean 0.4376 (placed 0.4376); origins x mean 0.0000
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/root-3101/home.log:[03:17:21] DIAG home placement: drawn dx mean 0.1226 min 0.0022 max 0.2176; placed kettle x mean 0.4376 min 0.3172; settled button x mean 0.4312 min 0.2456
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/seed-3101/home.log:[03:12:14] keyframe filter: chain feasible 7/64 staged starts; rejected at {'k_back': 57}, why [('ik', 57)]
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/seed-3101/home.log:[03:12:14] DIAG home placement: drawn dx mean 0.1150 min 0.0043 max 0.2183; placed kettle x mean 0.4300 min 0.3193; settled button x mean 0.4963 min 0.3149
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/seed-3101/home.log:[03:12:48] keyframe filter: chain feasible 21/64 staged starts; rejected at {'k_back': 43}, why [('ik', 43)]
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/seed-3101/home.log:[03:12:48] DIAG home placement: drawn dx mean 0.1226 min 0.0022 max 0.2176; placed kettle x mean 0.4376 min 0.3172; settled button x mean 0.4312 min 0.2456
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/seed-3101/home.log:[03:13:24] keyframe filter: chain feasible 22/64 staged starts; rejected at {'k_back': 42}, why [('ik', 42)]
+/home/zyl5090/e10-kettle-lid-t12-20261124/diag/place/seed-3101/home.log:[03:13:24] DIAG home placement: drawn dx mean 0.1047 min 0.0004 max 0.2198; placed kettle x mean 0.4197 min 0.3154; settled button x mean 0.4306 min 0.2329
