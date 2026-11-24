@@ -1,0 +1,26 @@
+### read/*/home.log
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/read/kettle_q/home.log:[05:12:10] keyframe filter: chain feasible 7/64 staged starts; rejected at {'k_back': 57}, why [('ik', 57)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/read/kettle_q/home.log:[05:12:10] DIAG after settle: kettle root x mean 0.4987 (placed 0.4300), max |root-placed| 0.0744; table x mean 0.4300 (placed 0.4300); origins x mean 0.0000
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/read/kettle_root/home.log:[05:11:29] keyframe filter: chain feasible 7/64 staged starts; rejected at {'k_back': 57}, why [('ik', 57)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/read/kettle_root/home.log:[05:11:29] DIAG after settle: kettle root x mean 0.4987 (placed 0.4300), max |root-placed| 0.0744; table x mean 0.4300 (placed 0.4300); origins x mean 0.0000
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/read/kettle_vel/home.log:[05:12:50] keyframe filter: chain feasible 7/64 staged starts; rejected at {'k_back': 57}, why [('ik', 57)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/read/kettle_vel/home.log:[05:12:50] DIAG after settle: kettle root x mean 0.4987 (placed 0.4300), max |root-placed| 0.0744; table x mean 0.4300 (placed 0.4300); origins x mean 0.0000
+### pre/*/home.log
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/pre/kettle_q/home.log:[05:16:20] keyframe filter: chain feasible 7/64 staged starts; rejected at {'k_back': 57}, why [('ik', 57)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/pre/kettle_q/home.log:[05:16:20] DIAG after settle: kettle root x mean 0.4987 (placed 0.4300), max |root-placed| 0.0744; table x mean 0.4300 (placed 0.4300); origins x mean 0.0000
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/pre/kettle_root/home.log:[05:15:40] keyframe filter: chain feasible 7/64 staged starts; rejected at {'k_back': 57}, why [('ik', 57)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/pre/kettle_root/home.log:[05:15:40] DIAG after settle: kettle root x mean 0.4987 (placed 0.4300), max |root-placed| 0.0744; table x mean 0.4300 (placed 0.4300); origins x mean 0.0000
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/pre/robot_body/home.log:[05:17:00] keyframe filter: chain feasible 13/64 staged starts; rejected at {'k_back': 51}, why [('ik', 51)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/pre/robot_body/home.log:[05:17:00] DIAG after settle: kettle root x mean 0.4300 (placed 0.4300), max |root-placed| 0.0000; table x mean 0.4300 (placed 0.4300); origins x mean 0.0000
+### kin/*/home/home_expert.log
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/kin/base-3101/home/home_expert.log:[05:21:30] keyframe filter: chain feasible 7/64 staged starts; rejected at {'k_back': 57}, why [('ik', 57)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/kin/base-3101/home/home_expert.log:[05:21:59] keyframe filter: chain feasible 21/64 staged starts; rejected at {'k_back': 43}, why [('ik', 43)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/kin/base-3101/home/home_expert.log:[05:22:31] keyframe filter: chain feasible 22/64 staged starts; rejected at {'k_back': 42}, why [('ik', 42)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/kin/seed-3101/home/home_expert.log:[05:19:50] keyframe filter: chain feasible 13/64 staged starts; rejected at {'k_back': 51}, why [('ik', 51)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/kin/seed-3101/home/home_expert.log:[05:20:19] keyframe filter: chain feasible 19/64 staged starts; rejected at {'k_back': 45}, why [('ik', 45)]
+/home/zhaobo/e10-kettle-lid-t12-20261124/diag/kin/seed-3101/home/home_expert.log:[05:20:52] keyframe filter: chain feasible 21/64 staged starts; rejected at {'k_back': 43}, why [('ik', 43)]
+### place/settle-3101/home.log
+[04:54:18] keyframe filter: chain feasible 13/64 staged starts; rejected at {'k_back': 51}, why [('ik', 51)]
+[04:54:18] DIAG after settle: kettle root x mean 0.4300 (placed 0.4300), max |root-placed| 0.0000; table x mean 0.4300 (placed 0.4300); origins x mean 0.0000
+[04:54:47] keyframe filter: chain feasible 19/64 staged starts; rejected at {'k_back': 45}, why [('ik', 45)]
+[04:54:47] DIAG after settle: kettle root x mean 0.4376 (placed 0.4376), max |root-placed| 0.0000; table x mean 0.4376 (placed 0.4376); origins x mean 0.0000
