@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evo-DexBench 接入 RoboScope Kit：进展、问题与建议（2026-11-25）</title>
+<style>
+:root{
+  --fg:var(--foreground,#191919);--mfg:var(--muted-foreground,#666);--bd:var(--border,#e3e3e3);
+  --pop:var(--popover,#fff);--popfg:var(--popover-foreground,#191919);--bg:var(--background,#fff);
+  --box:var(--secondary,#f5f5f4);--rad:var(--radius,8px);
+  --c-heap:var(--chart-1,#257de0);--c-arena:var(--chart-2,#f47230);--c-anon:var(--chart-3,#00b894);
+  --c-stack:var(--chart-4,#f2a600);--c-file:var(--chart-5,#ee7fac);--c-driver:var(--chart-6,#008a17);--c-main:var(--mfg)}
+body{margin:0;font-family:var(--font-sans,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif);color:var(--fg);line-height:1.6;font-size:14px}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-size:20px;margin:6px 0 2px}
+.date{color:var(--mfg);font-size:12px;margin-bottom:10px}
+h2{font-size:16px;margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+ul{margin:0;padding:0;list-style:none}
+li{display:flex;gap:10px;margin:6px 0}
+li .i{flex:none;width:22px;text-align:center}
+b{font-weight:600}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.kpi{background:var(--box);border-radius:var(--rad);padding:12px 16px}
+.kpi .v{font-size:22px;font-weight:600}
+.kpi .l{font-size:12px;color:var(--mfg)}
+table{border-collapse:collapse;font-size:13px;width:100%;margin-top:6px}
+th,td{border-bottom:1px solid var(--bd);padding:5px 8px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mfg);font-weight:500}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;margin:4px 0 6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+h3{font-size:13.5px;margin:14px 0 0;font-weight:600}
+.sub{font-size:12px;color:var(--mfg);margin:0 0 4px}
+svg{display:block;overflow:visible}
+.axis text{font-size:11px;fill:var(--mfg)}
+.gl line{stroke:var(--bd)}
+.ev line{stroke:var(--mfg);stroke-dasharray:3 3}
+.ev text{font-size:10.5px;fill:var(--mfg)}
+.tip{position:fixed;pointer-events:none;background:var(--pop);color:var(--popfg);border:1px solid var(--bd);border-radius:var(--rad);padding:8px 10px;font-size:12px;line-height:1.5;display:none;z-index:9;min-width:170px}
+.tip .r{display:flex;justify-content:space-between;gap:12px}
+.note{font-size:12px;color:var(--mfg);margin-top:6px}
+.sug{counter-reset:s}
+.sug li{counter-increment:s}
+.sug li .i::before{content:counter(s);display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--c-heap);color:#fff;font-size:12px;align-items:center;justify-content:center}
+.tag{font-size:11px;color:var(--mfg);border:1px solid var(--bd);border-radius:10px;padding:0 6px;margin-left:4px;white-space:nowrap}
+</style></head><body><div class="wrap">
+
+<h1>Evo-DexBench 接入 RoboScope Kit：进展、问题与建议</h1>
+<div class="date">2026-11-25 · Issue #140 / Draft PR #156 · 加速 #141</div>
+
+<div class="grid3">
+  <div class="kpi"><div class="v">3 / 30</div><div class="l">✅ 已完成原生对照的任务，全部通过</div></div>
+  <div class="kpi"><div class="v">65–80 小时</div><div class="l">⏳ 按现有跑法，剩余对照还需要的时间</div></div>
+  <div class="kpi"><div class="v">1.3 GiB</div><div class="l">🧠 单个仿真环境真正在用的内存（看到的是 9–22 GiB）</div></div>
+</div>
+
+<h2>✅ 进展</h2>
+<ul>
+<li><span class="i">🔗</span><span>Kit 已接入 Evo-DexBench 全部 30 个任务，PR #156 是草稿（标为部分完成）。</span></li>
+<li><span class="i">⚖️</span><span>对照方法：同一任务、同一检查点，原生评测和 Kit 各跑 100 回合；SR 和 StageScore 之差要在 2 个标准误以内，并逐回合核对布局、条件和种子。</span></li>
+<li><span class="i">📊</span><span>已通过：m01（按台灯）、m02（拨开关）、m04（压烤面包机）。m06 正在跑。</span></li>
+<li><span class="i">🐞</span><span>修了一个 Kit 重试 bug：环境崩溃后重试同一轮必然失败，已改正并推到 PR。</span></li>
+</ul>
+<table>
+<tr><th>任务</th><th>SR 原生 → Kit</th><th>StageScore 原生 → Kit</th><th>结论</th></tr>
+<tr><td>m01</td><td>0.25 → 0.18（z −1.20）</td><td>0.313 → 0.222（z −1.60）</td><td>✅ 通过</td></tr>
+<tr><td>m02</td><td>0.37 → 0.34（z −0.44）</td><td>0.586 → 0.553（z −0.71）</td><td>✅ 通过</td></tr>
+<tr><td>m04</td><td>0.48 → 0.50（z +0.28）</td><td>0.792 → 0.800（z +0.28）</td><td>✅ 通过</td></tr>
+</table>
+
+<h2>🐢 为什么慢</h2>
+<ul>
+<li><span class="i">🤖</span><span><b>推理占 73% 的时间。</b>DP-T 每出一段动作要做 100 步扩散去噪，一次只给 4 个环境推理，GPU 利用率约 18%。</span></li>
+<li><span class="i">🧪</span><span>仿真不慢：ManiSkill 3 / SAPIEN，CPU 物理加 GPU 渲染，4 个环境一个控制步约 20 ms。</span></li>
+<li><span class="i">⏱️</span><span>回合很长（1000–5000 步）；一轮 4 个环境要等最慢的那个，失败回合会跑满上限。</span></li>
+<li><span class="i">🧱</span><span>内存只够一次跑一个 studio 任务；每个任务原生和 Kit 还要各跑一遍。</span></li>
+</ul>
+
+<h2>🧠 为什么内存这么大（单个环境实测）</h2>
+<ul>
+<li><span class="i">📈</span><span><b>加载峰值：</b>建场景时 SAPIEN 一次开出约 2700 个线程，临时内存冲到 15–22 GiB。</span></li>
+<li><span class="i">🔒</span><span><b>用完不还：</b>程序已经释放了这些内存，但 glibc 默认把它留在进程里，常驻内存一直停在峰值（下图第一行）。让大块内存立即归还后，10 秒内就落回 1.3 GiB（第三行）。</span></li>
+<li><span class="i">🔁</span><span><b>加载两遍：</b>上游先用一个探测子进程把场景完整加载一遍，退出后再正式加载一遍。</span></li>
+<li><span class="i">🎮</span><span>显存不是问题：每个环境 1.4–2.2 GiB。</span></li>
+<li><span class="i">🏷️</span><span><b>是 bench 自带的问题</b>：原生评测一样。AutoDL 容器把它放大了：能看到 128 核但只给 12 核，内存上限 96 GiB。</span></li>
+</ul>
+
+<div class="legend" id="legend"></div>
+<div id="panels"></div>
+<div class="note" id="note"></div>
+
+<h2>🛠️ 已经做的</h2>
+<ul>
+<li><span class="i">⚙️</span><span>剩下的对照两边都加 <code>MALLOC_ARENA_MAX=2</code>，kitchen 任务因此可以两两并行；m04 验证过，结果和耗时都没变。</span></li>
+<li><span class="i">📋</span><span>调度改成按场景估内存并接管正在运行的作业；内存问题已写进 PR 的协议文档。</span></li>
+</ul>
+
+<h2>💡 修改建议</h2>
+<ul class="sug">
+<li><span class="i"></span><span><b>加载完立即归还内存</b><span class="tag">Kit · 内存</span><br>每次建环境或重建后，在仿真子进程里调用一次 <code>malloc_trim(0)</code>。效果相当于图里第三行，但不会拖慢建环境。预计每个环境常驻内存从 4–22 GiB 降到约 1.5 GiB。</span></li>
+<li><span class="i"></span><span><b>一轮的 4 个环境错开加载</b><span class="tag">Kit · 内存</span><br>按顺序建，不同时建，峰值从约 4 × 20 GiB 降到约 1 × 20 GiB。和第 1 条一起做，studio 任务也能 3–4 个并行。</span></li>
+<li><span class="i"></span><span><b>Worker 默认设置 <code>MALLOC_ARENA_MAX=2</code></b><span class="tag">Kit · 内存</span><br>用户不用自己配，也能避开 arena 碎片。</span></li>
+<li><span class="i"></span><span><b>DDPM 采样用 CUDA Graph</b><span class="tag">Kit · 速度</span><br>数学完全不变，只省掉 100 步里的 GPU 启动开销，有望明显缩短 73% 那部分时间。</span></li>
+<li><span class="i"></span><span><b>多个 Worker 合并推理</b><span class="tag">Kit · 速度</span><br>把多轮环境放进同一次推理，batch 从 4 加大，提高 GPU 利用率。前提是先做第 1、2 条。</span></li>
+<li><span class="i"></span><span><b>向上游提 issue</b><span class="tag">上游</span><br>限制 SAPIEN 加载线程数，去掉启动探测的重复加载。</span></li>
+<li><span class="i"></span><span><b>验收先加机器</b><span class="tag">本次验收</span><br>原生那边不能改，所以再开 2 台同规格实例分担 studio 任务，总时间可以从约 80 小时降到约 30 小时。</span></li>
+</ul>
+
+</div><div class="tip" id="tip"></div>
+<script>
+const DATA = {"runs":[{"title":"① 默认设置","sub":"glibc 默认：释放后内存留在线程 arena 里，不还给系统","t":[-0.26,1.75,3.75,5.75,7.75,12.71,21.29,29.69,31.93,34.1,36.22,38.18,42.05,44.08,46.09,48.1,50.59,57.22,64.39,67.4,69.41,71.49,73.49,75.67,77.73,79.85,81.91,83.97,85.97,88.02,90.06,92.08,94.12,96.17,98.26,100.32,102.35,104.38,106.43,108.49,110.53,112.56,114.63,116.72,118.72],"s":{"heap":[0.0,0.09,0.13,0.22,0.23,0.23,0.24,0.24,0.24,0.24,0.24,0.24,0.1,0.19,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.27,0.0,0.0],"arena":[0.0,0.0,0.0,0.02,0.02,9.38,18.4,21.51,21.57,21.57,21.57,21.57,0.0,0.0,0.02,1.35,6.26,15.33,20.39,21.51,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,21.52,0.0,0.0],"anon":[0.0,0.11,0.16,0.18,0.18,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.12,0.18,0.18,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.0,0.0],"stack":[0.0,0.0,0.01,0.01,0.01,0.04,0.05,0.03,0.01,0.01,0.01,0.01,0.0,0.01,0.01,0.02,0.04,0.04,0.03,0.02,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.0,0.0],"file":[0.0,0.17,0.31,0.4,0.4,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.2,0.4,0.4,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.0,0.0],"driver":[0.0,0.0,0.0,0.03,0.03,0.06,0.06,0.06,0.07,0.07,0.07,0.07,0.0,0.03,0.03,0.06,0.06,0.06,0.06,0.06,0.07,0.07,0.07,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.0,0.0],"main":[0.52,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55]},"threads":[0,64,64,71,73,2436,2685,1054,71,71,71,71,64,71,71,871,1882,2755,1812,411,71,71,71,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,0,0],"events":[{"t":74.56,"name":"环境建好"},{"t":94.71,"name":"第 2 轮（只重置）"},{"t":117.01,"name":"关闭"},{"t":42.05,"name":"探测进程退出，再加载一遍"}]},{"title":"② MALLOC_ARENA_MAX=2（现在验收用的设置）","sub":"线程共用 2 个 arena；能还回多少看运气，每次不同","t":[-0.37,1.66,3.76,5.77,7.77,13.17,21.08,27.6,32.47,34.5,36.56,38.9,40.87,42.98,45.51,47.51,49.51,51.66,53.58,55.87,57.79,59.91,61.92,63.92,65.92,67.92,69.92,71.92,73.92,75.93,77.93,79.93,81.93,83.93,85.93,87.94,89.94,91.94,93.94,95.94,97.94,99.94,101.95,103.95,105.95,107.96,109.96,111.97],"s":{"heap":[0.0,0.09,0.11,0.22,0.23,2.46,6.09,9.54,11.55,11.51,11.51,11.51,11.51,0.0,0.1,0.23,0.23,1.25,1.25,1.25,1.85,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,1.79,0.0,0.0],"arena":[0.0,0.0,0.0,0.02,0.04,2.37,5.58,8.37,9.73,9.73,9.73,9.73,9.73,0.0,0.0,0.02,0.02,0.87,1.06,1.06,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,1.24,0.0,0.0],"anon":[0.0,0.11,0.14,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.0,0.12,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.0,0.0],"stack":[0.0,0.0,0.01,0.01,0.01,0.05,0.05,0.04,0.03,0.01,0.01,0.01,0.01,0.0,0.01,0.01,0.01,0.01,0.02,0.03,0.02,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.0,0.0],"file":[0.0,0.17,0.24,0.4,0.4,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.0,0.22,0.4,0.4,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.0,0.0],"driver":[0.0,0.0,0.0,0.03,0.03,0.06,0.06,0.06,0.06,0.06,0.07,0.07,0.07,0.0,0.0,0.03,0.03,0.06,0.06,0.06,0.06,0.06,0.07,0.07,0.07,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.0,0.0],"main":[0.5,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.56,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55]},"threads":[0,64,64,71,73,2798,2418,2029,578,89,71,71,71,0,64,71,71,209,407,357,216,71,71,71,71,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,0,0],"events":[{"t":67.8,"name":"环境建好"},{"t":87.96,"name":"第 2 轮（只重置）"},{"t":108.82,"name":"关闭"},{"t":45.51,"name":"探测进程退出，再加载一遍"}]},{"title":"③ 再加 MALLOC_MMAP_THRESHOLD_=131072","sub":"大块内存释放时立即还给系统：峰值很快落回 1.3 GiB（但建环境变慢到 104 秒）","t":[-0.33,1.67,3.67,5.68,7.68,9.68,11.68,13.68,15.69,20.89,24.31,27.4,30.9,34.1,37.49,43.21,45.8,49.39,51.35,53.35,55.35,57.36,59.39,61.39,63.4,65.4,67.4,69.4,71.4,73.41,75.41,78.19,81.0,83.41,86.12,88.52,91.6,93.71,95.75,97.75,99.75,101.75,103.75,105.75,107.76,109.76,111.79,113.79,115.8,117.8,119.8,121.8,123.8,125.81,127.81,129.81,131.81,133.81,135.82,137.82,139.82,141.82,143.82,145.83,147.83],"s":{"heap":[0.0,0.09,0.12,0.15,0.15,0.15,0.16,0.16,0.16,0.2,0.2,0.21,0.22,0.24,0.25,0.26,0.28,0.29,0.29,0.29,0.29,0.29,0.0,0.1,0.15,0.15,0.15,0.16,0.16,0.16,0.16,0.19,0.21,0.22,0.23,0.24,0.25,0.26,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.29,0.0,0.0],"arena":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.03,0.02,0.02,0.03,0.04,0.11,0.06,0.07,0.09,0.1,0.1,0.1,0.1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.01,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.07,0.0,0.0],"anon":[0.0,0.12,0.18,0.22,0.22,0.23,0.23,0.23,0.27,5.62,9.62,12.5,14.7,12.33,10.36,3.54,2.52,1.78,0.58,0.57,0.58,0.58,0.0,0.12,0.21,0.23,0.23,0.23,0.23,0.23,0.25,1.01,2.58,1.8,1.35,0.76,3.09,1.19,0.57,0.57,0.57,0.58,0.58,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.0,0.0],"stack":[0.0,0.0,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.04,0.04,0.04,0.05,0.05,0.05,0.04,0.03,0.03,0.01,0.01,0.01,0.01,0.0,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.02,0.02,0.02,0.03,0.03,0.02,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.0,0.0],"file":[0.0,0.18,0.32,0.4,0.4,0.4,0.4,0.4,0.4,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.0,0.22,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.41,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.43,0.0,0.0],"driver":[0.0,0.0,0.0,0.03,0.03,0.03,0.03,0.03,0.03,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.07,0.07,0.07,0.0,0.0,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.06,0.06,0.06,0.06,0.06,0.06,0.06,0.07,0.07,0.07,0.07,0.12,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.14,0.0,0.0],"main":[0.52,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55]},"threads":[0,64,65,71,71,71,71,71,71,2544,2545,2546,2548,2478,2343,1921,1152,279,71,71,71,71,0,64,73,71,71,71,71,71,71,321,449,417,366,264,520,166,71,71,71,71,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,73,0,0],"events":[{"t":103.95,"name":"环境建好"},{"t":124.09,"name":"第 2 轮（只重置）"},{"t":144.59,"name":"关闭"},{"t":59.64,"name":"探测进程退出，再加载一遍"}]}],"note":"m01（studio 场景）单个环境，AutoDL RTX 4090 节点，2026-11-25。约每 2 秒一个点，读 /proc/<pid>/smaps 的常驻内存，按类型堆叠；下方细线是仿真子进程的线程数。悬停可看数值。"};
+const KINDS=[["heap","glibc 主堆"],["arena","glibc 线程 arena"],["anon","其他匿名内存"],["stack","线程栈"],["file","文件与动态库"],["driver","GPU 驱动映射"],["main","主进程"]];
+const NS="http://www.w3.org/2000/svg";
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const lg=document.getElementById("legend");
+KINDS.forEach(([k,n])=>lg.insertAdjacentHTML("beforeend",`<span><i class="sw" style="background:var(--c-${k})"></i>${n}</span>`));
+const tip=document.getElementById("tip");
+const W=Math.min(document.querySelector(".wrap").clientWidth||720,900), M={l:40,r:10,t:8,b:20};
+const tmax=Math.max(...DATA.runs.map(r=>r.t[r.t.length-1]));
+const ymax=25;
+function chart(parent,run,kind){
+  const H=kind==="mem"?190:58, svg=el("svg",{width:W,height:H},parent);
+  const iw=W-M.l-M.r, ih=H-M.t-M.b, x=t=>M.l+Math.max(0,t)/tmax*iw;
+  const top=kind==="mem"?ymax:3000, y=v=>M.t+ih-v/top*ih;
+  const g=el("g",{class:"gl"},svg), ax=el("g",{class:"axis"},svg), nt=kind==="mem"?5:1;
+  for(let i=0;i<=nt;i++){const v=top*i/nt;el("line",{x1:M.l,x2:W-M.r,y1:y(v),y2:y(v)},g);el("text",{x:M.l-6,y:y(v)+4,"text-anchor":"end"},ax).textContent=v}
+  if(kind==="mem")for(let s=0;s<=tmax;s+=20)el("text",{x:x(s),y:H-5,"text-anchor":"middle"},ax).textContent=s+(s>=140?" 秒":"");
+  el("text",{x:W-M.r,y:M.t+11,"text-anchor":"end"},ax).textContent=kind==="mem"?"内存 GiB":"线程数";
+  if(kind==="mem"){
+    const base=run.t.map(()=>0);
+    KINDS.forEach(([k])=>{const hi=run.t.map((_,i)=>base[i]+run.s[k][i]);
+      const d="M"+run.t.map((t,i)=>x(t)+","+y(hi[i])).join("L")+"L"+run.t.map((t,i)=>[t,i]).reverse().map(([t,i])=>x(t)+","+y(base[i])).join("L")+"Z";
+      el("path",{d,fill:`var(--c-${k})`,stroke:"var(--bg)","stroke-width":0.6},svg);hi.forEach((v,i)=>base[i]=v)});
+  }else el("path",{d:"M"+run.t.map((t,i)=>x(t)+","+y(run.threads[i])).join("L"),fill:"none",stroke:"var(--c-heap)","stroke-width":2,"stroke-linejoin":"round"},svg);
+  const ev=el("g",{class:"ev"},svg);
+  run.events.slice().sort((a,b)=>a.t-b.t).forEach((e,j)=>{el("line",{x1:x(e.t),x2:x(e.t),y1:M.t,y2:M.t+ih},ev);if(kind==="mem")el("text",{x:x(e.t)+3,y:M.t+26+(j%2)*13},ev).textContent=e.name});
+  const cross=el("line",{y1:M.t,y2:M.t+ih,stroke:"var(--fg)",opacity:0},svg);
+  const hit=el("rect",{x:M.l,y:M.t,width:iw,height:ih,fill:"transparent"},svg);
+  hit.addEventListener("mousemove",ev2=>{const r=svg.getBoundingClientRect(),t=(ev2.clientX-r.left-M.l)/iw*tmax;let i=0;while(i<run.t.length-1&&run.t[i]<t)i++;
+    cross.setAttribute("x1",x(run.t[i]));cross.setAttribute("x2",x(run.t[i]));cross.setAttribute("opacity",.5);
+    let h=`<div><b>${run.title.slice(0,1)}</b> · ${Math.max(0,run.t[i]).toFixed(0)} 秒</div>`,tot=0;
+    KINDS.slice().reverse().forEach(([k,n])=>{const v=run.s[k][i];tot+=v;if(v>=0.01)h+=`<div class="r"><span><i class="sw" style="background:var(--c-${k});width:9px;height:9px"></i> ${n}</span><span>${v.toFixed(2)}</span></div>`});
+    h+=`<div class="r"><b>合计</b><b>${tot.toFixed(1)} GiB</b></div><div class="r"><span>线程数</span><span>${run.threads[i]}</span></div>`;
+    tip.innerHTML=h;tip.style.display="block";tip.style.left=(ev2.clientX+200>innerWidth?ev2.clientX-200:ev2.clientX+14)+"px";tip.style.top=(ev2.clientY+12)+"px"});
+  hit.addEventListener("mouseleave",()=>{tip.style.display="none";cross.setAttribute("opacity",0)});
+}
+const P=document.getElementById("panels");
+DATA.runs.forEach(run=>{P.insertAdjacentHTML("beforeend",`<h3>${run.title}</h3><p class="sub">${run.sub}</p>`);const d=document.createElement("div");P.appendChild(d);chart(d,run,"mem");chart(d,run,"thr")});
+document.getElementById("note").textContent=DATA.note;
+</script></body></html>
