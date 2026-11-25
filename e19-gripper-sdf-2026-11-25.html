@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-19 夹爪指垫局部 SDF：点云与 SDF 说明（2026-11-25）</title>
+<style>
+:root {
+  --page: #f9f9f9; --surface: #ffffff; --ink: #191919; --ink2: #666666; --grid: #e7e7e7; --axis: #c2c2c2;
+  --s-target: #257de0; --s-mover: #f47230; --s-gripper: #00b894; --s-support: #f2a600;
+  --neg: #ec4647; --mid: #efefef; --pos: #257de0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #0b0b0b; --surface: #191919; --ink: #efefef; --ink2: #9c9c9c; --grid: #303030; --axis: #474747;
+    --s-target: #338ced; --s-mover: #e76624; --s-gripper: #00a888; --s-support: #d28e05;
+    --neg: #eb6263; --mid: #383838; --pos: #338ced;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.7 -apple-system, "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 32px 20px 80px; }
+h1 { font-size: 26px; margin: 0 0 4px; }
+h2 { font-size: 20px; margin: 40px 0 10px; padding-top: 8px; border-top: 1px solid var(--grid); }
+h3 { font-size: 16px; margin: 20px 0 6px; }
+.sub { color: var(--ink2); margin: 0 0 18px; }
+.card { background: var(--surface); border: 1px solid var(--grid); border-radius: 10px; padding: 16px 18px; margin: 12px 0; }
+.note { color: var(--ink2); font-size: 13px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { border-bottom: 1px solid var(--grid); padding: 6px 8px; text-align: left; vertical-align: top; }
+th { color: var(--ink2); font-weight: 600; }
+code { font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace; background: var(--page); padding: 1px 4px; border-radius: 4px; }
+.viewer { display: grid; grid-template-columns: 1fr 270px; gap: 14px; }
+@media (max-width: 820px) { .viewer { grid-template-columns: 1fr; } }
+canvas#scene { width: 100%; height: 480px; background: var(--surface); border: 1px solid var(--grid); border-radius: 10px; cursor: grab; touch-action: none; display: block; }
+.ctrl { background: var(--surface); border: 1px solid var(--grid); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+.ctrl label { display: flex; align-items: center; gap: 8px; margin: 4px 0; cursor: pointer; }
+.ctrl input[type=range] { width: 100%; }
+.ctrl button { flex: 1; font: inherit; font-size: 13px; padding: 4px 0; border: 1px solid var(--axis); border-radius: 6px; background: var(--page); color: var(--ink); cursor: pointer; }
+.sw { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+.sq { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex: none; border: 1px solid var(--ink2); }
+.ramp { height: 10px; border-radius: 3px; background: linear-gradient(90deg, var(--neg), var(--mid), var(--pos)); margin: 4px 0 2px; }
+.rampl { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink2); }
+#tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--axis); border-radius: 6px; padding: 6px 9px; font-size: 13px; line-height: 1.5; display: none; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.sdfgrid { display: grid; grid-template-columns: 64px repeat(9, 1fr); gap: 2px; font-size: 12px; margin-top: 8px; }
+.sdfgrid div { padding: 6px 2px; text-align: center; border-radius: 4px; }
+.sdfgrid .h { color: var(--ink2); background: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink2); margin-top: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+svg text { fill: var(--ink2); font-size: 12px; }
+.pill { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--axis); color: var(--ink2); }
+</style>
+</head>
+<body>
+<main>
+<h1>夹爪指垫局部 SDF：点云与 SDF 说明</h1>
+<p class="sub">a2r E-19（issue #403）· 2026-11-25 · 实验排队中，<b>尚无训练结果</b></p>
+
+<div class="card">
+<b>一句话：</b>E-10 的 RL Teacher 原来靠物体和手指的表面点云来"看"场景。E-19 在两根手指的指垫内侧各取 3×3 个点，把这 18 个点到手里物体表面的<b>有符号距离（SDF）</b>作为一路新的特权输入，看 Teacher 能不能用更少的 env 步数学会任务。
+<p class="note" style="margin:8px 0 0">下面的三维图是<b>示意</b>：每组的点数和真实任务（开口桶扔垃圾）一致，选点方法（最远点采样）和 SDF 的数值变换与代码相同；物体形状换成了简单的长方体，不是真实资产。拖动可以旋转，滚轮缩放，鼠标停在点上能看到数值；右侧"夹爪特写"按钮把视角拉近到两根手指。</p>
+</div>
+
+<h2>1　点云里有什么</h2>
+<p>点云<b>不是整个场景</b>，也<b>不包括机械臂</b>，只有和任务有关的物体加上两根手指。机械臂自身的状态由另外 35 维本体信息提供，桌面、背景、手臂连杆都不进点云。</p>
+
+<div class="viewer">
+  <canvas id="scene" aria-label="点云与指垫 SDF 三维示意图"></canvas>
+  <div class="ctrl">
+    <div style="display:flex;gap:6px;margin-bottom:8px"><button id="vAll" type="button">全景</button><button id="vClose" type="button">夹爪特写</button></div>
+    <b>显示</b>
+    <label><input type="checkbox" data-g="mover" checked><span class="sw" style="background:var(--s-mover)"></span>mover 垃圾 96 点</label>
+    <label><input type="checkbox" data-g="target" checked><span class="sw" style="background:var(--s-target)"></span>target 桶 128 点</label>
+    <label><input type="checkbox" data-g="support" checked><span class="sw" style="background:var(--s-support)"></span>support 底座 64 点</label>
+    <label><input type="checkbox" data-g="gripper" checked><span class="sw" style="background:var(--s-gripper)"></span>gripper 两指各 16 点</label>
+    <label><input type="checkbox" id="showSdf" checked><span class="sq" style="background:linear-gradient(90deg,var(--neg),var(--mid),var(--pos))"></span>指垫 SDF 查询点 18 个</label>
+    <div style="margin-top:10px"><b>夹爪开口</b> <span id="wv"></span></div>
+    <input type="range" id="w" min="22" max="70" value="30" step="0.5" aria-label="夹爪开口（毫米）">
+    <div style="margin-top:6px"><b>物体上下偏移</b> <span id="dzv"></span></div>
+    <input type="range" id="dz" min="-40" max="40" value="16" step="1" aria-label="物体相对夹爪的上下偏移（毫米）">
+    <div style="margin-top:10px"><b>SDF 特征值</b></div>
+    <div class="ramp"></div>
+    <div class="rampl"><span>−1.79 压入 5 mm</span><span>0 贴面</span><span>3.93 远</span></div>
+    <p class="note">默认：开口 30 mm 正好等于物体宽度，物体上移 16 mm，所以靠指根的两排点贴着表面（0），靠指端那排已经在物体下方（正值）。开口小于 30 mm 时手指压进物体，距离变负。把物体往上或往下移，就能看到靠指端或靠指根的一排点先离开表面。</p>
+  </div>
+</div>
+<div class="legend"><span>圆点 = 点云（颜色表示角色标签）</span><span>带框方块 = SDF 查询点（颜色表示距离）</span><span>点云和 SDF 都在机器人基座坐标系下</span></div>
+
+<h3>每道题的点数</h3>
+<table>
+<tr><th>组</th><th>角色标签</th><th>开口桶（扔垃圾）</th><th>锤钉子</th></tr>
+<tr><td>要移动的物体</td><td>mover</td><td>垃圾 96</td><td>锤子 112</td></tr>
+<tr><td>目标</td><td>target</td><td>桶 128</td><td>钉子 24</td></tr>
+<tr><td>支撑物</td><td>support</td><td>底座 64</td><td>木块、垫台等共 120</td></tr>
+<tr><td>夹爪</td><td>gripper</td><td>两指各 16，共 32</td><td>同左</td></tr>
+<tr><td><b>合计</b></td><td></td><td><b>约 320</b></td><td><b>约 290</b></td></tr>
+</table>
+
+<h3>点是怎么选的</h3>
+<ol>
+<li><b>开始时只选一次。</b>环境建好时，在每个物体的<b>碰撞网格</b>表面（没有碰撞网格才用外观网格）先密密地撒一批候选点，再做<b>最远点采样</b>：每次挑离已选点最远的候选点，直到凑够规定数量，所以点在表面上分得比较均匀。手指的点同样从手指网格表面采样。</li>
+<li><b>之后每一步只是跟着动。</b>这些点固定在物体自身的坐标系里。每一步用物体或手指当前的位置和朝向把它们变换到机器人基座坐标系，物体动，点就跟着动，不会重新采样。拖动上面"物体上下偏移"的滑块，垃圾的 96 个点就是这样整体平移的。</li>
+<li><b>喂给网络时每个点有三部分：</b>基座坐标系下的坐标、相对夹爪中心（TCP）的坐标、6 类角色的 one-hot 标签（mover / target / tool / gripper / support / other）。网络用 PointNet 先对每个点单独过一个小网络，再对所有点取最大值，压成一个固定长度的向量，所以不同任务点数不一样也没关系。</li>
+</ol>
+<p class="note">这些点用的是仿真真值坐标，没有遮挡也没有噪声，只给仿真里的 Teacher 用，不能直接上真机；真机策略要先蒸馏成只看相机和本体状态的视觉策略。</p>
+
+<h2>2　指垫局部 SDF</h2>
+<p><b>SDF（有符号距离）</b>回答的是"这个点离物体表面有多远"：在物体外是正数，贴在表面上是 0，压进物体里是负数。</p>
+<ul>
+<li><b>点放在哪：</b>Piper X 是两指平行夹爪，物体夹在两根手指的内侧平面之间。每根手指的内侧平面上取 3×3 个点：横向 3 列（−8、0、8 mm），从指端往里 3 排（离指端 2、6.5、11 mm），正好盖住和物体接触的指垫，两指共 18 个点。</li>
+<li><b>查谁的距离：</b>只查手里要搬的物体（mover），用它的碰撞网格；有两套碰撞体的物体只查抓取用的那套。第一版不查目标和支撑物。</li>
+<li><b>没有标签：</b>它不是点云，不进 PointNet，而是固定顺序的 18 个数：前 9 个是左指，后 9 个是右指，每个位置的含义永远不变，网络靠位置就能分辨。</li>
+<li><b>数值变换：</b>距离先截到 [−5 mm, 50 mm]，再取 <code>sign(d)·ln(1 + |d| / 1 mm)</code>。这样毫米级的变化被放大，远处的值又不会太大，和其他特权特征一样落在 O(1) 的量级。</li>
+</ul>
+
+<div class="card">
+<b>当前 18 个值</b>（随上面的滑块变化；行 = 手指，列 = 指垫上的 9 个点）
+<div class="sdfgrid" id="sdfgrid"></div>
+</div>
+
+<div class="card">
+<b>距离 → 特征值</b>
+<svg id="fchart" viewBox="0 0 640 260" width="100%" role="img" aria-label="SDF 距离到特征值的映射曲线"></svg>
+<p class="note">灰色区域在截断范围之外：比 −5 mm 压得更深、或比 50 mm 更远，都按边界值算。</p>
+</div>
+
+<h2>3　网络的输入和输出</h2>
+<table>
+<tr><th>名字</th><th>形状</th><th>内容</th><th>谁能看</th></tr>
+<tr><td><code>points</code></td><td>(P, 3)，每点带角色标签</td><td>上面的点云，P 约 300</td><td>actor、critic</td></tr>
+<tr><td><code>proprio</code></td><td>35</td><td>末端位姿和速度、关节角和速度、夹爪开口、上一步动作</td><td>actor、critic</td></tr>
+<tr><td><code>priv</code></td><td>32</td><td>回合进度、难度、起点类型、课程档位，加最多 28 个任务专属特征（比如物体离目标多远）</td><td>critic</td></tr>
+<tr><td><b><code>sdf</code>（新增）</b></td><td><b>18</b></td><td><b>两指 × 9 个指垫点的距离特征</b></td><td><b>看实验组</b></td></tr>
+<tr><td><b>输出：动作</b></td><td>7</td><td>末端平移 3 维 + 旋转 3 维（基座坐标系下的增量），加夹爪开合速度 1 维</td><td>actor 输出</td></tr>
+</table>
+<p class="note">SDF 单独作为一路输入，不占 <code>priv</code> 的 28 个任务槽位。开关默认关闭，关闭时观测和网络结构都和以前完全一样，旧的 checkpoint 照常加载。</p>
+
+<h2>4　E-19 的实验设置</h2>
+<table>
+<tr><th>组</th><th>SDF 给谁</th><th>想回答的问题</th></tr>
+<tr><td>基线</td><td>不给</td><td>直接用仓库里已有的单题训练记录，不重跑</td></tr>
+<tr><td>只给 critic</td><td>只有打分网络看得到</td><td>更准的接触距离能不能让价值估计更准、间接学得更快，同时动作网络不依赖它</td></tr>
+<tr><td>actor + critic</td><td>两个网络都看得到</td><td>动作网络直接用指垫距离，能不能学得更快</td></tr>
+</table>
+<h3>两道题</h3>
+<table>
+<tr><th>题</th><th>基线训练成功率到 0.9 用的步数</th><th>作用</th></tr>
+<tr><td>开口桶扔垃圾</td><td>8.8M</td><td>基线学得已经很快（第 500 次更新 Home 198/200），主要看有没有副作用</td></tr>
+<tr><td>锤钉子</td><td>19.6M</td><td>Home 成功数在第 500 到 1000 次更新之间从 0 涨到 199/200，有区分度，主要靠它判断</td></tr>
+</table>
+<h3>控制住什么、怎么判断</h3>
+<ul>
+<li>每道题三组用同一个起点库、同一套训练配方、同一个随机种子，都训 1000 次更新，都在第 500 和第 1000 次用同样固定的 200 个 Home 起点评测。</li>
+<li>主指标：训练成功率第一次到 0.9 时用的 <b>env 步数</b>（墙钟时间只作参考，卡常常和别的作业共用）。另外看各起点类型的解锁步数、critic 的 value loss 曲线和仿真吞吐。</li>
+<li>只跑一个种子的结果只算初步信号。有差异时三组各补一个种子；<b>两个种子都少用至少 20% 的步数</b>、Home 成功数也不下降，才算真的变快。</li>
+</ul>
+<h3>和截图里那篇论文的区别</h3>
+<table>
+<tr><th></th><th>论文（据截图）</th><th>E-19</th></tr>
+<tr><td>手</td><td>五指灵巧手</td><td>两指平行夹爪</td></tr>
+<tr><td>查询点</td><td>5 个指尖各 1 个，共 5 维</td><td>两指指垫各 3×3，共 18 维</td></tr>
+<tr><td>用途</td><td>观测，同时用作奖励塑形</td><td><b>只当观测</b>，不改奖励，单独检验"多看到距离"本身有没有用</td></tr>
+<tr><td>点云</td><td>认为 128 点最划算</td><td>不改点云（约 300 点），只加 SDF</td></tr>
+</table>
+
+<h2>5　进度</h2>
+<p><span class="pill">排队中</span>　开口桶的两组排在机器 d 上：先在 d 上跑一遍跨机回放、拿到 d 自己的回执，再各跑 1 次更新的冒烟测试，然后正式训练。锤钉子的两组排在另一台机器上，等外部占卡的作业退出。拿到结果后在本仓库另发一份结果报告。</p>
+</main>
+<div id="tip"></div>
+
+<script>
+(() => {
+"use strict";
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+// ---------- seeded RNG and geometry ----------
+let seed = 7;
+const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+// surface samples of an axis-aligned box (half extents h), optionally without the top face
+function boxSurface(h, n, openTop) {
+  const faces = [];
+  const [a, b, c] = h;
+  const add = (axis, sign, u, v) => faces.push({ axis, sign, u, v, area: 4 * h[u] * h[v] });
+  add(0, 1, 1, 2); add(0, -1, 1, 2); add(1, 1, 0, 2); add(1, -1, 0, 2); add(2, -1, 0, 1);
+  if (!openTop) add(2, 1, 0, 1);
+  const tot = faces.reduce((s, f) => s + f.area, 0);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    let r = rnd() * tot, f = faces[0];
+    for (const g of faces) { if ((r -= g.area) <= 0) { f = g; break; } }
+    const p = [0, 0, 0];
+    p[f.axis] = f.sign * h[f.axis];
+    p[f.u] = (rnd() * 2 - 1) * h[f.u];
+    p[f.v] = (rnd() * 2 - 1) * h[f.v];
+    out.push(p);
+  }
+  return out;
+}
+// farthest point sampling: start from the first candidate, then repeatedly take the farthest one
+function fps(cands, k) {
+  const d = new Float64Array(cands.length).fill(Infinity), pick = [];
+  let cur = 0;
+  for (let i = 0; i < k; i++) {
+    pick.push(cands[cur]);
+    let best = -1, bi = 0;
+    for (let j = 0; j < cands.length; j++) {
+      const q = cands[j], p = cands[cur];
+      const dd = (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2 + (q[2] - p[2]) ** 2;
+      if (dd < d[j]) d[j] = dd;
+      if (d[j] > best) { best = d[j]; bi = j; }
+    }
+    cur = bi;
+  }
+  return pick;
+}
+// metres; z up; gripper closes along y
+const TRASH_H = [0.020, 0.015, 0.025], TRASH_C = [-0.05, 0, 0.10];
+const BIN_H = [0.05, 0.05, 0.06], BIN_C = [0.10, 0, 0.06];
+const BASE_H = [0.15, 0.11, 0.01], BASE_C = [0.02, 0, -0.01];
+const FINGER_H = [0.010, 0.003, 0.020];
+const TIP_Z = 0.088;                       // finger tips sit below the object centre
+const local = {
+  mover: fps(boxSurface(TRASH_H, 1500), 96),
+  target: fps(boxSurface(BIN_H, 2500, true), 128),
+  support: fps(boxSurface(BASE_H, 1500), 64),
+  finger: fps(boxSurface(FINGER_H, 800), 16),
+};
+const PAD_X = [-0.008, 0, 0.008], PAD_ROW = [0.002, 0.0065, 0.011];
+const state = { w: 0.030, dz: 0.016, show: { mover: true, target: true, support: true, gripper: true }, sdf: true };
+
+function sdBox(p, c, h) {
+  const q = [0, 1, 2].map(i => Math.abs(p[i] - c[i]) - h[i]);
+  const out = Math.hypot(Math.max(q[0], 0), Math.max(q[1], 0), Math.max(q[2], 0));
+  return out + Math.min(Math.max(q[0], q[1], q[2]), 0);
+}
+const feature = d => { const x = Math.min(Math.max(d, -0.005), 0.05); return Math.sign(x) * Math.log1p(Math.abs(x) / 0.001); };
+const FMIN = feature(-0.005), FMAX = feature(0.05);
+
+function buildPoints() {
+  const pts = [];
+  const tc = [TRASH_C[0], TRASH_C[1], TRASH_C[2] + state.dz];
+  const put = (arr, c, role, name) => arr.forEach(p => pts.push({ p: [p[0] + c[0], p[1] + c[1], p[2] + c[2]], role, name }));
+  put(local.mover, tc, "mover", "垃圾");
+  put(local.target, BIN_C, "target", "桶");
+  put(local.support, BASE_C, "support", "底座");
+  const sdf = [];
+  [-1, 1].forEach((side, fi) => {
+    // finger body sits outside its inner face y = side * w/2
+    const fc = [TRASH_C[0], side * (state.w / 2 + FINGER_H[1]), TIP_Z + FINGER_H[2]];
+    put(local.finger, fc, "gripper", fi ? "右指" : "左指");
+    PAD_ROW.forEach((r, ri) => PAD_X.forEach((x, ci) => {
+      const p = [TRASH_C[0] + x, side * state.w / 2, TIP_Z + r];
+      const d = sdBox(p, tc, TRASH_H);
+      sdf.push({ p, d, f: feature(d), finger: fi ? "右指" : "左指", row: ri, col: ci, idx: fi * 9 + ri * 3 + ci });
+    }));
+  });
+  return { pts, sdf };
+}
+
+// ---------- colour helpers ----------
+function hex(c) { c = c.replace("#", ""); return [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16)); }
+function mix(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
+function divColor(f) {
+  const neg = hex(css("--neg")), mid = hex(css("--mid")), pos = hex(css("--pos"));
+  const c = f < 0 ? mix(mid, neg, Math.min(-f / -FMIN, 1)) : mix(mid, pos, Math.min(f / FMAX, 1));
+  return c;
+}
+const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+
+// ---------- 3D view ----------
+const cv = document.getElementById("scene"), ctx = cv.getContext("2d"), tip = document.getElementById("tip");
+const view = { yaw: -0.65, pitch: 0.35, zoom: 1, center: [0.02, 0, 0.05] };
+let projected = [];
+function resize() {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  cv.width = r.width * dpr; cv.height = r.height * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); draw();
+}
+function project(p, W, H) {
+  const x = p[0] - view.center[0], y = p[1] - view.center[1], z = p[2] - view.center[2];
+  const cy = Math.cos(view.yaw), sy = Math.sin(view.yaw), cp = Math.cos(view.pitch), sp = Math.sin(view.pitch);
+  const x1 = cy * x - sy * y, y1 = sy * x + cy * y;          // yaw about z
+  const depth = y1 * cp + z * sp, up = z * cp - y1 * sp;      // pitch
+  const persp = 1 / (1 + depth * 1.2 / view.zoom);
+  const s = Math.min(W, H) * 2.9 * view.zoom * persp;
+  return [W / 2 + x1 * s, H / 2 - up * s, depth];
+}
+function draw() {
+  const W = cv.clientWidth, H = cv.clientHeight;
+  ctx.clearRect(0, 0, W, H);
+  const { pts, sdf } = buildPoints();
+  // axes (hairline) at the base frame origin
+  const o = project([0, 0, 0], W, H);
+  [[0.06, 0, 0, "x"], [0, 0.06, 0, "y"], [0, 0, 0.06, "z"]].forEach(([a, b, c, l]) => {
+    const e = project([a, b, c], W, H);
+    ctx.strokeStyle = css("--axis"); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(e[0], e[1]); ctx.stroke();
+    ctx.fillStyle = css("--ink2"); ctx.font = "12px sans-serif"; ctx.fillText(l, e[0] + 3, e[1] - 3);
+  });
+  const roleColor = { mover: css("--s-mover"), target: css("--s-target"), support: css("--s-support"), gripper: css("--s-gripper") };
+  const items = [];
+  pts.forEach(q => { if (state.show[q.role]) items.push({ kind: "pt", q, s: project(q.p, W, H) }); });
+  if (state.sdf) sdf.forEach(q => items.push({ kind: "sdf", q, s: project(q.p, W, H) }));
+  items.sort((a, b) => b.s[2] - a.s[2]);
+  const dim = state.sdf ? 0.45 : 1;
+  for (const it of items) {
+    const [x, y] = it.s;
+    if (it.kind === "pt") {
+      ctx.globalAlpha = dim;
+      ctx.fillStyle = roleColor[it.q.role];
+      ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 7); ctx.fill();
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.fillStyle = rgb(divColor(it.q.f));
+      ctx.strokeStyle = css("--ink"); ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(x - 5.5, y - 5.5, 11, 11, 2); ctx.fill(); ctx.stroke();
+    }
+  }
+  projected = items;
+  renderGrid(sdf);
+  document.getElementById("wv").textContent = (state.w * 1000).toFixed(1) + " mm";
+  document.getElementById("dzv").textContent = (state.dz * 1000 >= 0 ? "+" : "") + (state.dz * 1000).toFixed(0) + " mm";
+}
+function renderGrid(sdf) {
+  const g = document.getElementById("sdfgrid");
+  let html = '<div class="h"></div>';
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++)
+    html += `<div class="h">${["离指端 2", "6.5", "11 mm"][r]}<br>${["−8", "0", "+8"][c]}</div>`;
+  ["左指", "右指"].forEach((name, fi) => {
+    html += `<div class="h" style="text-align:left">${name}</div>`;
+    sdf.filter(s => s.finger === name).forEach(s => {
+      const strong = Math.abs(s.f) > 2.2;
+      html += `<div style="background:${rgb(divColor(s.f))};color:${strong ? "#ffffff" : css("--ink")}" title="${(s.d * 1000).toFixed(1)} mm">${s.f.toFixed(2)}</div>`;
+    });
+  });
+  g.innerHTML = html;
+}
+// interaction
+let drag = null;
+cv.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = "grabbing"; });
+cv.addEventListener("pointerup", () => { drag = null; cv.style.cursor = "grab"; });
+cv.addEventListener("pointermove", e => {
+  if (drag) {
+    view.yaw += (e.clientX - drag[0]) * 0.01;
+    view.pitch = Math.max(-1.4, Math.min(1.4, view.pitch + (e.clientY - drag[1]) * 0.01));
+    drag = [e.clientX, e.clientY]; tip.style.display = "none"; draw(); return;
+  }
+  const r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  let best = null, bd = 100;
+  for (const it of projected) { const d = (it.s[0] - mx) ** 2 + (it.s[1] - my) ** 2; if (d < bd || (it.kind === "sdf" && d < 100 && (!best || best.kind !== "sdf"))) { bd = d; best = it; } }
+  if (!best) { tip.style.display = "none"; return; }
+  const q = best.q;
+  tip.innerHTML = best.kind === "sdf"
+    ? `<b>SDF 查询点 #${q.idx + 1}</b>（${q.finger}）<br>离指端 ${[2, 6.5, 11][q.row]} mm，横向 ${[-8, 0, 8][q.col]} mm<br>距离 ${(q.d * 1000).toFixed(1)} mm → 特征 ${q.f.toFixed(2)}`
+    : `<b>${q.role}</b>（${q.name}）<br>基座系 (${q.p.map(v => (v * 1000).toFixed(0)).join(", ")}) mm`;
+  tip.style.display = "block"; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 10) + "px";
+});
+cv.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+cv.addEventListener("wheel", e => { e.preventDefault(); view.zoom = Math.max(0.4, Math.min(4, view.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); draw(); }, { passive: false });
+document.querySelectorAll("[data-g]").forEach(el => el.addEventListener("change", () => { state.show[el.dataset.g] = el.checked; draw(); }));
+document.getElementById("vAll").addEventListener("click", () => { Object.assign(view, { yaw: -0.65, pitch: 0.35, zoom: 1, center: [0.02, 0, 0.05] }); draw(); });
+document.getElementById("vClose").addEventListener("click", () => { Object.assign(view, { yaw: -1.25, pitch: 0.15, zoom: 3.6, center: [TRASH_C[0], 0, 0.108] }); draw(); });
+document.getElementById("showSdf").addEventListener("change", e => { state.sdf = e.target.checked; draw(); });
+document.getElementById("w").addEventListener("input", e => { state.w = e.target.value / 1000; draw(); });
+document.getElementById("dz").addEventListener("input", e => { state.dz = e.target.value / 1000; draw(); });
+
+// ---------- feature chart ----------
+function chart() {
+  const svg = document.getElementById("fchart"), W = 640, H = 260, L = 48, R = 16, T = 14, B = 36;
+  const dmin = -10, dmax = 60, fmin = -2.5, fmax = 4.5;
+  const X = d => L + (d - dmin) / (dmax - dmin) * (W - L - R), Y = f => T + (fmax - f) / (fmax - fmin) * (H - T - B);
+  let s = "";
+  s += `<rect x="${X(dmin)}" y="${T}" width="${X(-5) - X(dmin)}" height="${H - T - B}" fill="${css("--grid")}" opacity=".6"/>`;
+  s += `<rect x="${X(50)}" y="${T}" width="${X(dmax) - X(50)}" height="${H - T - B}" fill="${css("--grid")}" opacity=".6"/>`;
+  for (let f = -2; f <= 4; f += 1) s += `<line x1="${L}" x2="${W - R}" y1="${Y(f)}" y2="${Y(f)}" stroke="${css("--grid")}"/><text x="${L - 8}" y="${Y(f) + 4}" text-anchor="end">${f}</text>`;
+  for (let d = -10; d <= 60; d += 10) s += `<text x="${X(d)}" y="${H - B + 18}" text-anchor="middle">${d}</text>`;
+  s += `<line x1="${X(0)}" x2="${X(0)}" y1="${T}" y2="${H - B}" stroke="${css("--axis")}"/>`;
+  s += `<line x1="${L}" x2="${W - R}" y1="${Y(0)}" y2="${Y(0)}" stroke="${css("--axis")}"/>`;
+  s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">距离 d（mm，负 = 压进物体）</text>`;
+  s += `<text x="12" y="${T + 4}" transform="rotate(-90 12 ${T + 4})" text-anchor="end">特征值</text>`;
+  let path = "";
+  for (let d = dmin; d <= dmax; d += 0.25) path += (path ? "L" : "M") + X(d).toFixed(1) + "," + Y(feature(d / 1000)).toFixed(1);
+  s += `<path d="${path}" fill="none" stroke="${css("--s-target")}" stroke-width="2"/>`;
+  [[-5, "压入 5 mm → −1.79"], [1, "1 mm → 0.69"], [5, "5 mm → 1.79"], [50, "≥ 50 mm → 3.93"]].forEach(([d, l]) => {
+    const f = feature(d / 1000);
+    s += `<circle cx="${X(d)}" cy="${Y(f)}" r="4" fill="${css("--s-target")}" stroke="${css("--surface")}" stroke-width="2"/>`;
+    s += `<text x="${X(d) + (d >= 50 ? -6 : 8)}" y="${Y(f) + (d < 0 ? 16 : -8)}" text-anchor="${d >= 50 ? "end" : "start"}">${l}</text>`;
+  });
+  s += `<line id="xh" y1="${T}" y2="${H - B}" stroke="${css("--ink2")}" stroke-dasharray="3 3" visibility="hidden"/>`;
+  s += `<circle id="xd" r="4" fill="${css("--s-target")}" stroke="${css("--surface")}" stroke-width="2" visibility="hidden"/>`;
+  s += `<rect x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent" id="hit"/>`;
+  svg.innerHTML = s;
+  const hit = svg.querySelector("#hit"), xh = svg.querySelector("#xh"), xd = svg.querySelector("#xd");
+  hit.addEventListener("mousemove", e => {
+    const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const d = dmin + (loc.x - L) / (W - L - R) * (dmax - dmin), f = feature(d / 1000);
+    xh.setAttribute("x1", X(d)); xh.setAttribute("x2", X(d)); xh.setAttribute("visibility", "visible");
+    xd.setAttribute("cx", X(d)); xd.setAttribute("cy", Y(f)); xd.setAttribute("visibility", "visible");
+    tip.innerHTML = `距离 ${d.toFixed(1)} mm → 特征 ${f.toFixed(2)}`; tip.style.display = "block";
+    tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 10) + "px";
+  });
+  hit.addEventListener("mouseleave", () => { xh.setAttribute("visibility", "hidden"); xd.setAttribute("visibility", "hidden"); tip.style.display = "none"; });
+}
+window.addEventListener("resize", resize);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { draw(); chart(); });
+resize(); chart();
+if (location.hash === "#close") document.getElementById("vClose").click();
+})();
+</script>
+</body>
+</html>
