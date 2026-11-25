@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>擦砧板：松手后海绵为什么会插进板里（接触点示意）</title>
+<style>
+:root{--paper:#F7F4EE;--card:#FFF;--ink:#1C1B18;--ink2:#3B3832;--muted:#6E685F;--line:#E4DED3;--line2:#CEC6B8;
+--p1:#B0451E;--p1s:#F5E5DC;--p2:#14706A;--p2s:#DDEEEA;--p3:#3B4C9E;--p3s:#E2E5F4;--gold:#A87A22;--golds:#F3EAD6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink2);font:18px/1.65 "Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+main{max-width:1120px;margin:0 auto;padding:56px 28px 80px}
+h1,h2{font-family:"Noto Serif SC","Source Han Serif SC","Songti SC",Georgia,serif;color:var(--ink);line-height:1.3}
+h1{font-size:40px;margin:14px 0 18px}
+h2{font-size:28px;margin:56px 0 14px;padding-top:12px;border-top:1px solid var(--line)}
+.bar{width:64px;height:5px;background:var(--p1);border-radius:3px}
+.lead{font-size:22px;color:var(--ink);max-width:960px}
+.tag{display:inline-block;font:13px/1 "JetBrains Mono",Consolas,monospace;padding:4px 8px;border-radius:6px;margin-right:6px;vertical-align:2px}
+.meas{background:var(--p2s);color:var(--p2)} .inf{background:var(--golds);color:var(--gold)} .todo{background:var(--p3s);color:var(--p3)}
+.callout{background:var(--p2s);border-left:5px solid var(--p2);padding:14px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.callout.warn{background:var(--golds);border-color:var(--gold)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.card h3{margin:0 0 6px;font-size:19px;color:var(--ink)}
+svg{width:100%;height:auto;display:block}
+table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:16px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left}
+th{background:#FBF9F5;color:var(--ink)}
+td.num{font-family:"JetBrains Mono",Consolas,monospace;text-align:right}
+.ctl{display:flex;align-items:center;gap:14px;margin:10px 0 4px;flex-wrap:wrap}
+.ctl input[type=range]{flex:1;min-width:240px}
+button{font:inherit;font-size:15px;padding:6px 14px;border:1px solid var(--line2);background:var(--card);border-radius:8px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--p3);outline-offset:2px}
+.readout{font-family:"JetBrains Mono",Consolas,monospace;font-size:15px;color:var(--ink)}
+.small{font-size:15px;color:var(--muted)}
+code{font-family:"JetBrains Mono",Consolas,monospace;font-size:.88em;background:#EFEBE3;padding:1px 5px;border-radius:4px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}h1{font-size:30px}.lead{font-size:19px}}
+@media print{.ctl{display:none}}
+</style>
+</head>
+<body>
+<main>
+<div class="bar"></div>
+<h1>松手后海绵为什么会插进砧板：缺的是接触点，不是力太大</h1>
+<p class="lead">仿真只在一组离散的“接触点”上计算支撑力。点与点之间不受力，也不检测是否穿入。海绵碰撞体是一整个方盒，手指松开后它开始翻转，下沉那一侧暂时没有接触点，于是陷进板面 2–3 mm，几个物理小步后接触点刷新才被弹回。把方盒切成 4 块后，这种插入就没有了。</p>
+<p class="small">2026-11-25 · issue #242 · 节点 a，Isaac Sim 5.1，物理配置 d7（每秒 240 个物理小步、30 个控制步） · 标签：
+<span class="tag meas">实测</span>来自逐小步记录；<span class="tag inf">推断</span>由实测反推；<span class="tag todo">待核实</span>逐个接触点的记录正在跑。</p>
+
+<h2>1. “接触点”是什么</h2>
+<p>两个物体碰到一起时，物理引擎不会去算整个面上的压力分布。它先找出少数几个代表点，每个点记下位置、法线方向和间距（负数表示已经穿入）。然后求解器只在这些点上施加推力，让间距回到不小于 0。</p>
+<div class="grid">
+  <div class="card">
+    <h3>可以想成桌腿</h3>
+    <p>桌面只有桌腿撑着的地方受力。桌腿之间没有支撑，哪里没腿，哪里就没人管。这些“腿”的位置由引擎每隔一段时间重新安排，对一个盒子贴在平面上的情况，它通常只放 4 条左右。</p>
+  </div>
+  <div class="card">
+    <h3>为什么会“没有接触点”</h3>
+    <p>PhysX 会把上一步的接触点保留下来继续用（叫“持续接触流形”），物体相对动得够多了才重新生成一次。物体只是绕一条边轻轻转动时，保留的点可能都在转轴那一侧，另一侧压下去也不会马上补点，所以这段时间里那一侧没有任何推力。<span class="tag inf">推断</span></p>
+  </div>
+</div>
+
+<svg viewBox="0 0 1060 250" role="img" aria-label="方盒平放在板上，接触点在四个角">
+  <text x="20" y="28" font-size="17" fill="#1C1B18" font-family="serif">平放时：方盒底面的 4 个角上各有一个接触点（侧视只看得到 2 个）</text>
+  <rect x="60" y="170" width="940" height="44" fill="#E9DFCB" stroke="#CEC6B8"/>
+  <text x="70" y="236" font-size="14" fill="#6E685F">砧板（顶面 = 0 mm）</text>
+  <rect x="360" y="60" width="340" height="110" fill="#F5E5DC" stroke="#B0451E" stroke-width="2"/>
+  <text x="530" y="120" font-size="16" text-anchor="middle" fill="#B0451E">海绵碰撞盒 100 × 71 × 33 mm，6.3 g</text>
+  <g fill="#14706A"><circle cx="362" cy="170" r="7"/><circle cx="698" cy="170" r="7"/></g>
+  <g stroke="#14706A" stroke-width="3" marker-end="url(#up)"><line x1="362" y1="208" x2="362" y2="180"/><line x1="698" y1="208" x2="698" y2="180"/></g>
+  <defs><marker id="up" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#14706A"/></marker></defs>
+  <text x="730" y="196" font-size="15" fill="#14706A">● 接触点：推力只作用在这里</text>
+</svg>
+
+<h2>2. 松手那一瞬间发生了什么（拖动看每个物理小步）</h2>
+<p>下面的侧视图逐个物理小步回放一个实测回合（海绵加重到 25 g 的那组，第 96 号环境）。海绵的倾角、最深一角的深度、砧板托力都是记录值；转轴位置由倾角和最深深度反推；接触点的位置是示意。</p>
+<div class="card">
+  <div class="ctl">
+    <button id="prev" aria-label="上一小步">◀</button>
+    <input id="slider" type="range" min="0" max="0" value="0" aria-label="物理小步">
+    <button id="next" aria-label="下一小步">▶</button>
+    <button id="play">播放</button>
+  </div>
+  <div class="readout" id="readout"></div>
+  <svg id="scene" viewBox="0 0 1060 330" role="img" aria-label="海绵逐小步侧视"></svg>
+  <svg id="chart" viewBox="0 0 1060 210" role="img" aria-label="最深角深度和砧板托力随物理小步变化"></svg>
+  <p class="small">侧视图里海绵的倾角放大了 6 倍，方便看清；深度按实际毫米标注。灰色虚线是 3 mm 的穿板否决线。</p>
+</div>
+
+<div class="callout warn"><b>关键一组数</b> <span class="tag meas">实测</span>
+手指在第 638.0 步离开海绵后，海绵的转速在 4 个物理小步（1/60 秒）里从 83°/s 涨到 250°/s，最深一角插到 −3.47 mm。这段时间砧板托海绵的力只有 0.18 N，比海绵自重 0.245 N 还小，说明它几乎是在“自由下落式地翻”，下沉那一侧没有被顶住。下一个小步（638.5）海绵突然被推回到 −0.79 mm，再下一步回到正常静止的 −0.16 mm。</div>
+
+<h2>3. 为什么切成 4 块就好了</h2>
+<div class="grid">
+  <div class="card">
+    <h3>一整块：一组接触点</h3>
+    <svg viewBox="0 0 500 200" aria-label="一整块碰撞盒翻转时，下沉侧没有接触点">
+      <rect x="20" y="140" width="460" height="40" fill="#E9DFCB"/>
+      <g transform="rotate(-4 300 140)"><rect x="90" y="40" width="320" height="100" fill="#F5E5DC" stroke="#B0451E" stroke-width="2"/></g>
+      <circle cx="300" cy="140" r="7" fill="#14706A"/>
+      <circle cx="102" cy="154" r="8" fill="none" stroke="#B0451E" stroke-width="2" stroke-dasharray="4 3"/>
+      <text x="40" y="196" font-size="14" fill="#B0451E">这里压进去了，但没有接触点</text>
+      <text x="310" y="132" font-size="14" fill="#14706A">只剩转轴附近有点</text>
+    </svg>
+  </div>
+  <div class="card">
+    <h3>切成 2×2：每块各有一组</h3>
+    <svg viewBox="0 0 500 200" aria-label="切成四块后每块各自生成接触点">
+      <rect x="20" y="140" width="460" height="40" fill="#E9DFCB"/>
+      <rect x="90" y="40" width="160" height="100" fill="#DDEEEA" stroke="#14706A" stroke-width="2"/>
+      <rect x="250" y="40" width="160" height="100" fill="#DDEEEA" stroke="#14706A" stroke-width="2"/>
+      <g fill="#14706A"><circle cx="92" cy="140" r="7"/><circle cx="248" cy="140" r="7"/><circle cx="252" cy="140" r="7"/><circle cx="408" cy="140" r="7"/></g>
+      <text x="60" y="196" font-size="14" fill="#14706A">每块的角上都有点，哪一侧往下压都会被顶住</text>
+    </svg>
+  </div>
+</div>
+<p>4 块小盒合起来，外形和原来那一个方盒完全相同，质量、重心、夹持位置都没变。区别只在引擎眼里它是 4 个形状，会各自生成并刷新接触点。海绵往任何一侧翻，压下去的那块小盒自己的角上都有点，会被立刻顶住。</p>
+
+<h2>4. 试过的办法与结果</h2>
+<p class="small">每行都用同样的 3 个种子、339 个有效回合，统计松手后海绵角最深插进板面多少。“空手提速”指机械臂空着手去拿海绵时走快一点。</p>
+<table>
+<tr><th>改了什么</th><th>动的是哪一层</th><th class="num">插入 &gt; 2 mm 的回合</th><th class="num">超过 3 mm 否决线</th><th class="num">最深</th></tr>
+<tr><td>原版（加了空手提速）</td><td>—</td><td class="num">23</td><td class="num">3</td><td class="num">3.43 mm</td></tr>
+<tr><td>慢慢松手（卸力拉长到约 5 步）</td><td>动作</td><td class="num">27</td><td class="num">0</td><td class="num">2.79 mm</td></tr>
+<tr><td>松手前抬手 2 mm</td><td>动作</td><td class="num">22</td><td class="num">0</td><td class="num">2.95 mm</td></tr>
+<tr><td>仿真步长减半（480 Hz）</td><td>物理步长</td><td class="num">16</td><td class="num">1</td><td class="num">3.04 mm</td></tr>
+<tr><td>手指刚度 10000 → 2000 N/m</td><td>夹爪</td><td class="num">17</td><td class="num">1</td><td class="num">3.39 mm</td></tr>
+<tr><td>海绵 6.3 g → 25 g</td><td>物体质量</td><td class="num">10</td><td class="num">5</td><td class="num">15.15 mm</td></tr>
+<tr><td>砧板改用三角网格碰撞</td><td>砧板碰撞体</td><td class="num">23</td><td class="num">1</td><td class="num">8.86 mm</td></tr>
+<tr style="background:#EEF6F3"><td><b>海绵碰撞盒切成 2×2</b></td><td><b>海绵碰撞体</b></td><td class="num"><b>0</b></td><td class="num"><b>0</b></td><td class="num"><b>0.33 mm</b></td></tr>
+</table>
+<p>只有改海绵碰撞体有效，这和“下沉侧缺接触点”的解释一致：其他改动都没碰到接触点是怎么生成的。</p>
+<p>切块版在 853/854 种子上的配对验证：宽范围 303 → 305/307（救回 4、丢 2），自然 Home 30 秒内做完 303 → 309/311（救回 7、丢 1），最慢 5% 的回合用 823 步。宽范围丢的 2 个都卡在擦拭阶段（其中 1 个腕关节 J4 顶到上限），工具按规则标成“集中退化”，合入前还要查清并换新种子复核。</p>
+
+<h2>5. 哪些已确定、哪些还要核实</h2>
+<table>
+<tr><th>说法</th><th>状态</th><th>依据</th></tr>
+<tr><td>插入发生在手指离开之后，不是被手指推的</td><td><span class="tag meas">实测</span></td><td>手指离开后，手指作用在海绵上的力为 0，插入在之后的几个小步里逐渐加深</td></tr>
+<tr><td>插入期间砧板几乎没往上顶</td><td><span class="tag meas">实测</span></td><td>托力 0.06 N（6.3 g 版）、0.18 N（25 g 版），都不超过海绵自重</td></tr>
+<tr><td>海绵碰撞体就是一个规整方盒，插入是真的穿进去，不是量错</td><td><span class="tag meas">实测</span></td><td>读了碰撞体的 8 个角：底面平整在 0.35 mm 以内，和判定用的方盒一致</td></tr>
+<tr><td>原因是下沉侧没有接触点</td><td><span class="tag inf">推断</span></td><td>由上面三条、试过办法的结果，以及“切块后就好”反推</td></tr>
+<tr><td>每个接触点实际在哪、穿入多深</td><td><span class="tag todo">待核实</span></td><td>已在 <code>--substeps</code> 里加上逐点记录（位置、间距、法向力），原版和切块版各跑一次，正在节点 a 上排队；跑完会把这页的示意点换成实测点</td></tr>
+</table>
+<p class="small">数据位置：节点 a <code>~/e10-sponge-hold-20261124/rel/</code>（m25/scout-2 逐小步；pooled-*.txt 汇总；split-853 与 pair-split-* 配对验证）。</p>
+</main>
+<script>
+// m25 / scout-2 / env 96, per physics substep: [label, tilt_deg, deepest_corner_mm, board_force_N, finger_force_N]
+const F=[["637.4",0.17,-0.14,1.75,0.17],["637.5",0.18,-0.16,1.65,0.25],["637.6",0.17,-0.13,1.79,0.09],["637.7",0.18,-0.15,1.79,0.21],
+["638.0",0.48,-0.49,0.30,0],["638.1",0.90,-0.94,0.20,0],["638.2",1.49,-1.58,0.18,0],["638.3",2.27,-2.43,0.18,0],["638.4",3.22,-3.47,0.18,0],
+["638.5",0.82,-0.79,0.45,0],["638.6",0.19,-0.16,0.38,0],["638.7",0.19,-0.16,0.24,0],["639.0",0.19,-0.16,0.25,0]];
+const W=0.245, S=6, PX=3.4; // weight N, tilt exaggeration, px per mm
+const svg=document.getElementById('scene'), ch=document.getElementById('chart'), sl=document.getElementById('slider'), ro=document.getElementById('readout');
+sl.max=F.length-1;
+const NS='http://www.w3.org/2000/svg';
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e}
+function draw(i){
+  const [t,tilt,deep,fb,ff]=F[i]; svg.innerHTML='';
+  const top=230, L=100*PX, H=33*PX, x0=360;
+  el('rect',{x:40,y:top,width:980,height:60,fill:'#E9DFCB',stroke:'#CEC6B8'});
+  el('line',{x1:40,y1:top+3*PX,x2:1020,y2:top+3*PX,stroke:'#7A746B','stroke-dasharray':'6 5'});
+  el('text',{x:46,y:top+3*PX+16,'font-size':13,fill:'#6E685F'}).textContent='3 mm 否决线';
+  el('text',{x:46,y:top-6,'font-size':13,fill:'#6E685F'}).textContent='砧板顶面 0 mm';
+  // pivot reconstructed: distance from the low corner d = |deep| / sin(tilt); fall back to centre when flat
+  const th=tilt*Math.PI/180, d=(Math.abs(deep)>0.3&&th>0.002)?Math.min(100,Math.abs(deep)/Math.sin(th)):50;
+  const px=x0+d*PX, py=top+(Math.abs(deep)-d*Math.sin(th))*PX; // pivot at the surface level of the box bottom line
+  const g=el('g',{transform:`rotate(${-tilt*S} ${px} ${top})`});
+  el('rect',{x:x0,y:top-H+Math.abs(deep)*PX*0,width:L,height:H,fill:ff>0?'#F3EAD6':'#F5E5DC',stroke:'#B0451E','stroke-width':2},g);
+  // illustrative contact points
+  const gripped=ff>0, deepNow=Math.abs(deep)>0.6;
+  if(gripped||!deepNow){ [x0+2,x0+L-2].forEach(x=>el('circle',{cx:x,cy:top,r:7,fill:'#14706A'})); }
+  else { el('circle',{cx:px,cy:top,r:7,fill:'#14706A'});
+         el('circle',{cx:x0+4,cy:top+Math.abs(deep)*PX,r:10,fill:'none',stroke:'#B0451E','stroke-width':2,'stroke-dasharray':'4 3'});
+         el('text',{x:x0-6,y:top+Math.abs(deep)*PX+30,'font-size':14,fill:'#B0451E'}).textContent='压进去了，这里没有接触点'; }
+  if(gripped){ el('rect',{x:x0+L/2-60,y:top-H-30,width:22,height:40,fill:'#9AA3C8'}); el('rect',{x:x0+L/2+38,y:top-H-30,width:22,height:40,fill:'#9AA3C8'});
+    el('text',{x:x0+L/2,y:top-H-40,'font-size':14,'text-anchor':'middle',fill:'#3B4C9E'}).textContent='手指还夹着'; }
+  el('text',{x:x0+L/2,y:top-H/2,'font-size':15,'text-anchor':'middle',fill:'#B0451E'}).textContent='海绵';
+  // force arrows: board push vs weight
+  const bx=900, s=60;
+  el('line',{x1:bx,y1:160,x2:bx,y2:160-Math.min(fb,2)*s,stroke:'#14706A','stroke-width':6});
+  el('line',{x1:bx+40,y1:160,x2:bx+40,y2:160+W*s,stroke:'#B0451E','stroke-width':6});
+  el('text',{x:bx-30,y:180,'font-size':13,fill:'#14706A'}).textContent=`板托力 ${fb.toFixed(2)} N`;
+  el('text',{x:bx+10,y:160+W*s+18,'font-size':13,fill:'#B0451E'}).textContent=`自重 ${W} N`;
+  ro.textContent=`小步 ${t}　倾角 ${tilt.toFixed(2)}°　最深一角 ${deep.toFixed(2)} mm　砧板托力 ${fb.toFixed(2)} N　手指对海绵的力 ${ff.toFixed(2)} N`;
+  chart(i);
+}
+function chart(i){
+  ch.innerHTML=''; const x=k=>70+k*(940/(F.length-1)), yD=v=>20+(-v)/4*150, yF=v=>170-v/2*150;
+  const c=(t,a)=>el(t,a,ch);
+  c('line',{x1:70,y1:yD(-3),x2:1010,y2:yD(-3),stroke:'#7A746B','stroke-dasharray':'6 5'});
+  c('line',{x1:70,y1:yF(W),x2:1010,y2:yF(W),stroke:'#B0451E','stroke-dasharray':'2 4'});
+  c('polyline',{points:F.map((f,k)=>x(k)+','+yD(f[2])).join(' '),fill:'none',stroke:'#3B4C9E','stroke-width':3});
+  c('polyline',{points:F.map((f,k)=>x(k)+','+yF(Math.min(f[3],2))).join(' '),fill:'none',stroke:'#14706A','stroke-width':3});
+  c('line',{x1:x(i),y1:10,x2:x(i),y2:190,stroke:'#1C1B18','stroke-width':1});
+  F.forEach((f,k)=>{ if(k%2==0) c('text',{x:x(k),y:205,'font-size':12,'text-anchor':'middle',fill:'#6E685F'}).textContent=f[0]; });
+  c('text',{x:76,y:16,'font-size':13,fill:'#3B4C9E'}).textContent='蓝：最深一角深度（向下为负，0 到 −4 mm）';
+  c('text',{x:520,y:16,'font-size':13,fill:'#14706A'}).textContent='绿：砧板托力（0–2 N）；红虚线：自重 0.245 N';
+}
+let timer=null;
+sl.oninput=()=>draw(+sl.value);
+document.getElementById('prev').onclick=()=>{sl.value=Math.max(0,+sl.value-1);draw(+sl.value)};
+document.getElementById('next').onclick=()=>{sl.value=Math.min(F.length-1,+sl.value+1);draw(+sl.value)};
+document.getElementById('play').onclick=e=>{ if(timer){clearInterval(timer);timer=null;e.target.textContent='播放';return}
+  e.target.textContent='暂停'; timer=setInterval(()=>{sl.value=(+sl.value+1)%F.length;draw(+sl.value)},700)};
+draw(0);
+</script>
+</body>
+</html>
