@@ -130,7 +130,7 @@ svg text { fill: var(--ink2); font-size: 12px; }
 <tr><td><code>points</code></td><td>(P, 3)，每点带角色标签</td><td>上面的点云，P 约 300</td><td>actor、critic</td></tr>
 <tr><td><code>proprio</code></td><td>35</td><td>末端位姿和速度、关节角和速度、夹爪开口、上一步动作</td><td>actor、critic</td></tr>
 <tr><td><code>priv</code></td><td>32</td><td>回合进度、难度、起点类型、课程档位，加最多 28 个任务专属特征（比如物体离目标多远）</td><td>critic</td></tr>
-<tr><td><b><code>sdf</code>（新增）</b></td><td><b>18</b></td><td><b>两指 × 9 个指垫点的距离特征</b></td><td><b>看实验组</b></td></tr>
+<tr><td><b><code>sdf</code>（新增）</b></td><td><b>18（18 个标量）</b></td><td><b>两指 × 9 个指垫点，每点一个距离特征值</b>；不发这些点的坐标，也不给点云里的点算 SDF</td><td><b>看实验组</b></td></tr>
 <tr><td><b>输出：动作</b></td><td>7</td><td>末端平移 3 维 + 旋转 3 维（基座坐标系下的增量），加夹爪开合速度 1 维</td><td>actor 输出</td></tr>
 </table>
 <p class="note">SDF 单独作为一路输入，不占 <code>priv</code> 的 28 个任务槽位。开关默认关闭，关闭时观测和网络结构都和以前完全一样，旧的 checkpoint 照常加载。</p>
@@ -322,7 +322,7 @@ function renderGrid(sdf) {
   const g = document.getElementById("sdfgrid");
   let html = '<div class="h"></div>';
   for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++)
-    html += `<div class="h">${["离指端 2", "6.5", "11 mm"][r]}<br>${["−8", "0", "+8"][c]}</div>`;
+    html += `<div class="h">离指端 ${[2, 6.5, 11][r]} mm<br>横向 ${["−8", "0", "+8"][c]} mm</div>`;
   ["左指", "右指"].forEach((name, fi) => {
     html += `<div class="h" style="text-align:left">${name}</div>`;
     sdf.filter(s => s.finger === name).forEach(s => {
