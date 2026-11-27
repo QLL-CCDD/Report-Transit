@@ -13,132 +13,301 @@
   --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",Georgia,serif;
   --sans:"Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
   --mono:"JetBrains Mono","Cascadia Code",Consolas,ui-monospace,monospace;
-  /* 三组固定配色：原来 = 墨灰，只给 critic = 青，都给 = 赭 */
-  --base:#8A8376;--crit:var(--p2);--both:var(--p1);
+  /* 点云角色 */
+  --r-mover:#A87A22;--r-target:#8E9AC8;--r-support:#B8B0A2;--r-gripper:#14706A;
+  /* SDF：压入 → 贴面 → 远 */
+  --neg:#B0451E;--mid:#EFEAE2;--pos:#3B4C9E;
+  /* 三组 */
+  --base:#8A8376;--crit:#14706A;--both:#B0451E;
 }
 *{box-sizing:border-box}
-html{background:var(--paper)}
-body{margin:0;color:var(--ink2);font:18px/1.65 var(--sans)}
-main{max-width:1000px;margin:0 auto;padding:64px 40px 72px}
-.rule{width:56px;height:4px;background:var(--p1);border-radius:2px;margin-bottom:22px}
-.tag{font:13px var(--mono);color:var(--muted);letter-spacing:.04em}
-h1{font:700 44px/1.25 var(--serif);color:var(--ink);margin:10px 0 18px}
-h2{font:700 28px/1.3 var(--serif);color:var(--ink);margin:0 0 6px}
-.lead{font-size:23px;line-height:1.5;color:var(--ink);margin:0 0 28px}
+html,body{margin:0;height:100%;background:#E9E4DA;overflow:hidden}
+body{color:var(--ink2);font-family:var(--sans)}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--paper);padding:84px 88px 68px;display:none;box-shadow:0 10px 40px rgba(40,30,10,.12)}
+.slide.on{display:block}
+.rule{width:56px;height:4px;background:var(--p1);border-radius:2px;margin-bottom:16px}
+.kicker{font:15px var(--mono);letter-spacing:.08em;color:var(--muted)}
+h1{font:700 44px/1.25 var(--serif);color:var(--ink);margin:8px 0 10px}
+.lead{font-size:23px;line-height:1.5;color:var(--ink2);margin:0}
 .lead b{color:var(--p1)}
-section{margin-top:56px}
-.kicker{font:13px var(--mono);letter-spacing:.08em;margin-bottom:6px}
-.k1{color:var(--p1)}.k2{color:var(--p2)}.k3{color:var(--p3)}
-.note{color:var(--muted);font-size:15px;margin:0 0 18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
-.callout{background:var(--p1-soft);border-left:5px solid var(--p1);border-radius:0 12px 12px 0;padding:18px 24px;font-size:19px;color:var(--ink)}
-.callout.gold{background:var(--gold-soft);border-color:var(--gold);font-size:16px;color:var(--ink2)}
-.legend{display:flex;gap:22px;flex-wrap:wrap;font-size:15px;color:var(--ink2);margin:18px 0 0}
-.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:7px;vertical-align:-2px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.grp h3{font:600 17px var(--serif);color:var(--ink);margin:0 0 10px}
-.row{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:12px;margin:10px 0;font-size:15px}
+.cols{display:grid;grid-template-columns:960px 1fr;gap:40px;margin-top:30px}
+.view{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;height:560px;overflow:hidden}
+canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+.vbtn{position:absolute;top:14px;left:14px;display:flex;gap:8px}
+button{font:15px var(--sans);padding:6px 14px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink2);cursor:pointer}
+button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+button:focus-visible{outline:2px solid var(--p3);outline-offset:2px}
+.hint{position:absolute;bottom:12px;left:16px;font-size:14px;color:var(--muted)}
+.side{font-size:20px;line-height:1.6}
+.step{display:grid;grid-template-columns:36px 1fr;gap:12px;margin-bottom:22px}
+.step .n{width:32px;height:32px;border-radius:50%;background:var(--p2-soft);color:var(--p2);font:600 16px/32px var(--mono);text-align:center}
+.step b{color:var(--ink)}
+.key{font-size:16px;color:var(--muted);margin-top:8px}
+.key div{display:flex;align-items:center;gap:10px;margin:6px 0}
+.dot{width:12px;height:12px;border-radius:50%}
+.sq{width:14px;height:14px;border-radius:3px;border:1.2px solid var(--ink)}
+.ramp{height:12px;border-radius:3px;background:linear-gradient(90deg,var(--neg),var(--mid),var(--pos));margin:10px 0 4px}
+.rampl{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+/* page 2 */
+.answer{margin-top:26px;background:var(--p1-soft);border-left:5px solid var(--p1);border-radius:0 12px 12px 0;padding:18px 26px;font-size:26px;color:var(--ink)}
+.answer b{color:var(--p1)}
+.charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:26px;margin-top:30px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px}
+.card h3{font:700 21px var(--serif);color:var(--ink);margin:0 0 2px}
+.card .q{font-size:15px;color:var(--muted);margin:0 0 14px}
+.row{display:grid;grid-template-columns:104px 1fr;align-items:center;gap:10px;margin:14px 0;font-size:16px}
 .row .lab{color:var(--muted);text-align:right}
-.track{position:relative;height:28px;border-left:1px solid var(--line2)}
-.bar{position:absolute;left:0;top:4px;height:20px;border-radius:0 4px 4px 0}
-.val{position:absolute;top:4px;line-height:20px;font:600 14px var(--mono);color:var(--ink);white-space:nowrap}
-.na{color:var(--muted);font-size:14px;line-height:28px;padding-left:10px}
-.verdict{margin-top:12px;font-size:15px;color:var(--ink2)}
-.verdict b{color:var(--p1)}
-svg text{font-family:var(--sans)}
-footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
-@media (max-width:760px){main{padding:40px 18px}h1{font-size:32px}.lead{font-size:19px}.grid2{grid-template-columns:1fr}}
-@media print{html{background:#fff}main{padding:24px}}
+.track{position:relative;height:30px;border-left:1px solid var(--line2)}
+.bar{position:absolute;left:0;top:5px;height:20px;border-radius:0 4px 4px 0}
+.val{position:absolute;top:5px;line-height:20px;font:600 16px var(--mono);color:var(--ink);white-space:nowrap}
+.na{color:var(--muted);font-size:15px;line-height:30px;padding-left:10px}
+.legend{display:flex;gap:26px;font-size:16px;color:var(--ink2);margin-top:22px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:8px;vertical-align:-2px}
+.foot{position:absolute;left:88px;right:88px;bottom:34px;font-size:15px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+nav{position:fixed;right:20px;bottom:16px;display:flex;gap:8px;align-items:center;font:14px var(--mono);color:var(--muted);z-index:5}
+@media (max-width:900px){
+  html,body{overflow:auto;height:auto}
+  #stage{position:static;width:auto;height:auto;transform:none!important}
+  .slide{display:block;position:relative;padding:36px 18px;box-shadow:none}
+  .cols,.charts{grid-template-columns:1fr}
+  .view{height:380px}.foot{position:static;margin-top:20px}
+  nav{display:none}
+}
+@media print{html,body{overflow:visible;height:auto;background:#fff}#stage{position:static;transform:none!important}
+  .slide{display:block;position:relative;page-break-after:always;box-shadow:none}nav{display:none}}
 </style>
 </head>
 <body>
-<main>
+<div id="stage">
+
+<section class="slide on" id="p1" aria-label="第 1 页：改动">
   <div class="rule"></div>
-  <div class="tag">E-19 · a2r issue #403 · PR #408 · 2026-11-26</div>
-  <h1>给夹爪加“指尖距离感”，RL 学得更快吗？</h1>
-  <p class="lead"><b>没有。</b>让动作网络也看这些数据时反而更慢；只给评分网络时基本持平，仿真速度还降了约 18%。</p>
-  <div class="legend">
-    <span><i style="background:var(--base)"></i>原来（不加）</span>
-    <span><i style="background:var(--crit)"></i>只给 critic（评分网络）</span>
-    <span><i style="background:var(--both)"></i>actor + critic 都给（动作网络也看）</span>
+  <div class="kicker">E-19 · a2r issue #403 · PR #408 · 1 / 2 改动</div>
+  <h1>给 RL 加一路“指尖离物体多远”的输入</h1>
+  <p class="lead">原来 RL 只看点云；现在在两根手指内侧各放 9 个测量点，把它们到物体表面的距离也交给 RL。</p>
+  <div class="cols">
+    <div class="view">
+      <canvas id="scene" aria-label="点云和指面测量点三维示意，可拖动旋转"></canvas>
+      <div class="vbtn"><button type="button" id="vClose" class="on">夹爪特写</button><button type="button" id="vAll">全景</button></div>
+      <div class="hint">拖动旋转 · 滚轮缩放 · 示意图（开口桶任务，物体形状简化）</div>
+    </div>
+    <div class="side">
+      <div class="step"><div class="n">1</div><div><b>原来的输入</b>：物体和手指的表面点（圆点）。</div></div>
+      <div class="step"><div class="n">2</div><div><b>新加的输入</b>：每根手指 3×3 个测量点（方块），共 18 个距离值。</div></div>
+      <div class="step"><div class="n">3</div><div><b>颜色 = 距离</b>：贴着物体是白，压进去偏红，离得远偏蓝。</div></div>
+      <div class="ramp"></div>
+      <div class="rampl"><span>压入 5 mm</span><span>贴面</span><span>远</span></div>
+      <div class="key">
+        <div><span class="dot" style="background:var(--r-mover)"></span>手里的物体（垃圾）</div>
+        <div><span class="dot" style="background:var(--r-target)"></span>目标（桶）</div>
+        <div><span class="dot" style="background:var(--r-gripper)"></span>两根手指</div>
+        <div><span class="sq" style="background:var(--mid)"></span>新加的测量点</div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <section>
-    <div class="kicker k1">I · 做了什么</div>
-    <h2>每根手指 9 个点，量到物体的距离</h2>
-    <p class="note">两根手指共 18 个数，告诉 RL “手指离物体还有多远、有没有压进去”。只在仿真训练里用。</p>
-    <div class="card">
-      <svg viewBox="0 0 900 210" width="100%" role="img" aria-label="手指上的 9 个点测到物体的距离，得到 18 个数，输入 RL 策略">
-        <rect x="40" y="30" width="54" height="150" rx="10" fill="#EFEBE3" stroke="#CEC6B8"/>
-        <rect x="236" y="30" width="54" height="150" rx="10" fill="#EFEBE3" stroke="#CEC6B8"/>
-        <ellipse cx="165" cy="105" rx="46" ry="60" fill="#F5E5DC" stroke="#B0451E" stroke-width="1.5"/>
-        <text x="165" y="110" text-anchor="middle" font-size="15" fill="#B0451E">物体</text>
-        <g fill="#3B4C9E">
-          <circle cx="66" cy="70" r="4.5"/><circle cx="66" cy="105" r="4.5"/><circle cx="66" cy="140" r="4.5"/>
-          <circle cx="78" cy="70" r="4.5"/><circle cx="78" cy="105" r="4.5"/><circle cx="78" cy="140" r="4.5"/>
-          <circle cx="90" cy="70" r="4.5"/><circle cx="90" cy="105" r="4.5"/><circle cx="90" cy="140" r="4.5"/>
-          <circle cx="240" cy="70" r="4.5"/><circle cx="240" cy="105" r="4.5"/><circle cx="240" cy="140" r="4.5"/>
-          <circle cx="252" cy="70" r="4.5"/><circle cx="252" cy="105" r="4.5"/><circle cx="252" cy="140" r="4.5"/>
-          <circle cx="264" cy="70" r="4.5"/><circle cx="264" cy="105" r="4.5"/><circle cx="264" cy="140" r="4.5"/>
-        </g>
-        <g stroke="#3B4C9E" stroke-width="2" stroke-dasharray="4 3">
-          <line x1="96" y1="105" x2="118" y2="105"/><line x1="234" y1="105" x2="212" y2="105"/>
-        </g>
-        <text x="165" y="202" text-anchor="middle" font-size="14" fill="#6F695F">点 → 物体表面的距离</text>
-        <path d="M325 105 H395" stroke="#CEC6B8" stroke-width="2"/><path d="M395 99 L405 105 L395 111Z" fill="#CEC6B8"/>
-        <rect x="420" y="72" width="160" height="66" rx="12" fill="#E2E5F4" stroke="#3B4C9E"/>
-        <text x="500" y="101" text-anchor="middle" font-size="17" fill="#1C1B18" font-weight="600">18 个数</text>
-        <text x="500" y="123" text-anchor="middle" font-size="13" fill="#6F695F">2 指 × 9 点</text>
-        <path d="M595 105 H665" stroke="#CEC6B8" stroke-width="2"/><path d="M665 99 L675 105 L665 111Z" fill="#CEC6B8"/>
-        <rect x="690" y="72" width="170" height="66" rx="12" fill="#FFFFFF" stroke="#CEC6B8"/>
-        <text x="775" y="101" text-anchor="middle" font-size="17" fill="#1C1B18" font-weight="600">RL 策略</text>
-        <text x="775" y="123" text-anchor="middle" font-size="13" fill="#6F695F">额外输入</text>
-      </svg>
-    </div>
-  </section>
+<section class="slide" id="p2" aria-label="第 2 页：结论">
+  <div class="rule"></div>
+  <div class="kicker">E-19 · 2 / 2 结论</div>
+  <h1>加了以后，RL 没有学得更快</h1>
+  <div class="answer"><b>没有提升。</b>动作网络也看这些距离时更慢；只给评分网络时基本持平，仿真还慢了约 18%。</div>
+  <div class="legend">
+    <span><i style="background:var(--base)"></i>原来</span>
+    <span><i style="background:var(--crit)"></i>只给评分网络（critic）</span>
+    <span><i style="background:var(--both)"></i>评分 + 动作网络都给（actor + critic）</span>
+  </div>
+  <div class="charts">
+    <div class="card" id="g1"><h3>刀叉放进盒子</h3><p class="q">成功率到 90% 用的步数 · 越短越好</p></div>
+    <div class="card" id="g2"><h3>垃圾扔进开口桶</h3><p class="q">成功率到 90% 用的步数 · 越短越好</p></div>
+    <div class="card" id="g3"><h3>刀叉 · 训练一半时考试</h3><p class="q">第 500 轮，固定 200 题做对几道 · 越长越好</p></div>
+  </div>
+  <div class="foot">每组 1 个随机种子；“原来”用已有结果，任务、起点、种子相同。M = 百万仿真步。这个方向不再继续。</div>
+</section>
 
-  <section>
-    <div class="kicker k2">II · 结果</div>
-    <h2>学会要多少步？越短越好</h2>
-    <p class="note">训练成功率第一次达到 90% 时用掉的仿真步数（M = 百万步）。</p>
-    <div class="grid2">
-      <div class="card grp" id="g1"><h3>刀叉放进盒子</h3></div>
-      <div class="card grp" id="g2"><h3>垃圾扔进开口桶</h3></div>
-    </div>
-    <p class="verdict">两个任务上，加了 SDF 的组都<b>没有更早学会</b>。</p>
+</div>
+<nav><button type="button" id="prev" aria-label="上一页">←</button><span id="pg">1 / 2</span><button type="button" id="next" aria-label="下一页">→</button></nav>
 
-    <h2 style="margin-top:40px">训练到一半时的考试：越长越好</h2>
-    <p class="note">刀叉任务，第 500 轮（共 1000 轮）时，固定 200 道题里做对几道。</p>
-    <div class="card grp" id="g3"></div>
-    <p class="verdict">动作网络也看 SDF 时，前期几乎学不会（<b>18 / 200</b>），到第 1000 轮才追上（186 / 200）。</p>
-  </section>
-
-  <section>
-    <div class="kicker k3">III · 结论</div>
-    <div class="callout">这 18 个距离数没有帮 RL 学得更快，这个方向不再继续。</div>
-    <div class="callout gold" style="margin-top:14px">条件：每组只跑了 1 个随机种子；“原来”组用已有结果，任务、起点和种子相同。开口桶的“都给”组没跑；“只给 critic”组跑到 2030 万步被其他作业中断，但已越过 90% 线。</div>
-  </section>
-
-  <footer>记录：a2r issue #403（实验与结论）、PR #408（代码）。</footer>
-</main>
 <script>
-const COL={b:'var(--base)',c:'var(--crit)',a:'var(--both)'};
-const NAME={b:'原来',c:'只给 critic',a:'都给'};
-function bars(id,rows,max,unit){
-  const el=document.getElementById(id);
-  for(const [k,v] of rows){
-    const r=document.createElement('div');r.className='row';
-    r.innerHTML=`<div class="lab">${NAME[k]}</div><div class="track"></div>`;
-    const t=r.lastChild;
-    if(v==null){t.innerHTML='<span class="na">没跑</span>';}
-    else{const w=v/max*78;
-      t.innerHTML=`<div class="bar" title="${NAME[k]}：${v}${unit}" style="width:${w}%;background:${COL[k]}"></div><span class="val" style="left:calc(${w}% + 8px)">${v}${unit}</span>`;}
+(() => {
+"use strict";
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------- pages ----------
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+function show(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, k) => { const on = k === cur; s.classList.toggle("on", on); s.toggleAttribute("inert", !on); s.setAttribute("aria-hidden", String(!on)); });
+  document.getElementById("pg").textContent = `${cur + 1} / ${slides.length}`;
+  history.replaceState(null, "", "#" + (cur + 1));
+  if (cur === 0) resize();
+}
+function fit() {
+  const s = Math.min(innerWidth / 1600, innerHeight / 900) * 0.96;
+  document.getElementById("stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+document.getElementById("prev").onclick = () => show(cur - 1);
+document.getElementById("next").onclick = () => show(cur + 1);
+addEventListener("keydown", e => {
+  if (e.target.closest("input,textarea")) return;
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  if (e.key === "Home") show(0);
+  if (e.key === "End") show(slides.length - 1);
+});
+addEventListener("resize", fit);
+
+// ---------- page 2 bars ----------
+const COL = { b: "var(--base)", c: "var(--crit)", a: "var(--both)" };
+const NAME = { b: "原来", c: "只给评分", a: "都给" };
+function bars(id, rows, max, unit) {
+  const el = document.getElementById(id);
+  for (const [k, v] of rows) {
+    const r = document.createElement("div"); r.className = "row";
+    r.innerHTML = `<div class="lab">${NAME[k]}</div><div class="track"></div>`;
+    const t = r.lastChild;
+    if (v == null) t.innerHTML = '<span class="na">没跑</span>';
+    else { const w = v / max * 66;
+      t.innerHTML = `<div class="bar" title="${NAME[k]}：${v}${unit}" style="width:${w}%;background:${COL[k]}"></div><span class="val" style="left:calc(${w}% + 8px)">${v}${unit}</span>`; }
     el.appendChild(r);
   }
 }
-bars('g1',[['b',14.3],['c',14.7],['a',18.3]],20,' M');
-bars('g2',[['b',8.8],['c',13.0],['a',null]],20,' M');
-bars('g3',[['b',175],['c',184],['a',18]],200,' / 200');
+bars("g1", [["b", 14.3], ["c", 14.7], ["a", 18.3]], 20, " M");
+bars("g2", [["b", 8.8], ["c", "13.0"], ["a", null]], 20, " M");
+bars("g3", [["b", 175], ["c", 184], ["a", 18]], 200, "");
+
+// ---------- page 1: 3D sketch (same geometry as the 2026-11-25 explainer) ----------
+let seed = 7;
+const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+function boxSurface(h, n, openTop) {
+  const faces = [];
+  const add = (axis, sign, u, v) => faces.push({ axis, sign, u, v, area: 4 * h[u] * h[v] });
+  add(0, 1, 1, 2); add(0, -1, 1, 2); add(1, 1, 0, 2); add(1, -1, 0, 2); add(2, -1, 0, 1);
+  if (!openTop) add(2, 1, 0, 1);
+  const tot = faces.reduce((s, f) => s + f.area, 0), out = [];
+  for (let i = 0; i < n; i++) {
+    let r = rnd() * tot, f = faces[0];
+    for (const g of faces) { if ((r -= g.area) <= 0) { f = g; break; } }
+    const p = [0, 0, 0];
+    p[f.axis] = f.sign * h[f.axis]; p[f.u] = (rnd() * 2 - 1) * h[f.u]; p[f.v] = (rnd() * 2 - 1) * h[f.v];
+    out.push(p);
+  }
+  return out;
+}
+function fps(c, k) {
+  const d = new Float64Array(c.length).fill(Infinity), pick = []; let at = 0;
+  for (let i = 0; i < k; i++) {
+    pick.push(c[at]); let best = -1, bi = 0;
+    for (let j = 0; j < c.length; j++) {
+      const dd = (c[j][0] - c[at][0]) ** 2 + (c[j][1] - c[at][1]) ** 2 + (c[j][2] - c[at][2]) ** 2;
+      if (dd < d[j]) d[j] = dd; if (d[j] > best) { best = d[j]; bi = j; }
+    }
+    at = bi;
+  }
+  return pick;
+}
+const TRASH_H = [0.020, 0.015, 0.025], TRASH_C = [-0.05, 0, 0.10];
+const BIN_H = [0.05, 0.05, 0.06], BIN_C = [0.10, 0, 0.06];
+const BASE_H = [0.15, 0.11, 0.01], BASE_C = [0.02, 0, -0.01];
+const FINGER_H = [0.010, 0.003, 0.020], TIP_Z = 0.088, W_OPEN = 0.027, DZ = 0.022;   // 手指略压进物体，指端一排在物体下方：红、浅蓝、蓝三种都能看到
+const local = { mover: fps(boxSurface(TRASH_H, 1500), 96), target: fps(boxSurface(BIN_H, 2500, true), 128),
+  support: fps(boxSurface(BASE_H, 1500), 64), finger: fps(boxSurface(FINGER_H, 800), 16) };
+const PAD_X = [-0.008, 0, 0.008], PAD_ROW = [0.002, 0.0065, 0.011];
+function sdBox(p, c, h) {
+  const q = [0, 1, 2].map(i => Math.abs(p[i] - c[i]) - h[i]);
+  return Math.hypot(Math.max(q[0], 0), Math.max(q[1], 0), Math.max(q[2], 0)) + Math.min(Math.max(q[0], q[1], q[2]), 0);
+}
+const feature = d => { const x = Math.min(Math.max(d, -0.005), 0.05); return Math.sign(x) * Math.log1p(Math.abs(x) / 0.001); };
+const FMIN = feature(-0.005), FMAX = feature(0.05);
+const pts = [], sdf = [];
+const tc = [TRASH_C[0], TRASH_C[1], TRASH_C[2] + DZ];
+const put = (arr, c, role) => arr.forEach(p => pts.push({ p: [p[0] + c[0], p[1] + c[1], p[2] + c[2]], role }));
+put(local.mover, tc, "mover"); put(local.target, BIN_C, "target"); put(local.support, BASE_C, "support");
+[-1, 1].forEach(side => {
+  put(local.finger, [TRASH_C[0], side * (W_OPEN / 2 + FINGER_H[1]), TIP_Z + FINGER_H[2]], "gripper");
+  PAD_ROW.forEach(r => PAD_X.forEach(x => {
+    const p = [TRASH_C[0] + x, side * W_OPEN / 2, TIP_Z + r];
+    sdf.push({ p, f: feature(sdBox(p, tc, TRASH_H)) });
+  }));
+});
+const hex = c => { c = c.replace("#", ""); return [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16)); };
+const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+function divColor(f) {
+  const n = hex(css("--neg")), m = hex(css("--mid")), p = hex(css("--pos"));
+  const c = f < 0 ? mix(m, n, Math.min(-f / -FMIN, 1)) : mix(m, p, Math.min(f / FMAX, 1));
+  return `rgb(${c})`;
+}
+const cv = document.getElementById("scene"), ctx = cv.getContext("2d");
+const VIEWS = { close: { yaw: -0.55, pitch: 0.38, zoom: 3.0, center: [TRASH_C[0], 0, 0.113] },
+                all: { yaw: -0.65, pitch: 0.35, zoom: 1, center: [0.02, 0, 0.05] } };
+const view = { ...VIEWS.close };
+const CW = 960, CH = 560;
+function resize() { cv.width = CW * 2; cv.height = CH * 2; ctx.setTransform(2, 0, 0, 2, 0, 0); draw(); }
+function project(p) {
+  const x = p[0] - view.center[0], y = p[1] - view.center[1], z = p[2] - view.center[2];
+  const cy = Math.cos(view.yaw), sy = Math.sin(view.yaw), cp = Math.cos(view.pitch), sp = Math.sin(view.pitch);
+  const x1 = cy * x - sy * y, y1 = sy * x + cy * y, depth = y1 * cp + z * sp, up = z * cp - y1 * sp;
+  const s = Math.min(CW, CH) * 2.9 * view.zoom / (1 + depth * 1.2 / view.zoom);
+  return [CW / 2 + x1 * s, CH / 2 - up * s, depth];
+}
+const FINGERS = [-1, 1].map(s => [TRASH_C[0], s * (W_OPEN / 2 + FINGER_H[1]), TIP_Z + FINGER_H[2]]);
+function boxFaces(c, h) {   // 6 faces of an axis-aligned box, far faces first
+  const v = (a, b, d) => [c[0] + a * h[0], c[1] + b * h[1], c[2] + d * h[2]];
+  const F = [[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]], [[-1,-1,-1],[-1,1,-1],[-1,1,1],[-1,-1,1]],
+             [[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]], [[-1,-1,-1],[1,-1,-1],[1,-1,1],[-1,-1,1]],
+             [[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]], [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]]];
+  return F.map(f => f.map(p => project(v(...p)))).map(q => ({ q, d: q.reduce((s, p) => s + p[2], 0) / 4 })).sort((a, b) => b.d - a.d);
+}
+function drawBox(c, h, color, alpha) {
+  for (const f of boxFaces(c, h)) {
+    ctx.beginPath(); f.q.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
+    ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.fill();
+    ctx.globalAlpha = 0.9; ctx.strokeStyle = color; ctx.lineWidth = 1.2; ctx.stroke(); ctx.globalAlpha = 1;
+  }
+}
+function label(p, text, color) {
+  const s = project(p); ctx.font = "600 18px " + css("--sans"); ctx.fillStyle = color; ctx.textAlign = "center"; ctx.fillText(text, s[0], s[1]);
+}
+function draw() {
+  ctx.clearRect(0, 0, CW, CH);
+  const role = { mover: css("--r-mover"), target: css("--r-target"), support: css("--r-support"), gripper: css("--r-gripper") };
+  const big = view.zoom > 2;
+  // 特写只画夹爪和手里的物体；全景画全部点云
+  const shown = pts.filter(q => !big || q.role === "mover" || q.role === "gripper");
+  drawBox(tc, TRASH_H, role.mover, 0.10);
+  FINGERS.forEach(c => drawBox(c, FINGER_H, role.gripper, 0.16));
+  const items = shown.map(q => ({ k: 0, q, s: project(q.p) })).concat(sdf.map(q => ({ k: 1, q, s: project(q.p) })));
+  items.sort((a, b) => b.s[2] - a.s[2]);
+  for (const it of items) {
+    const [x, y] = it.s;
+    if (!it.k) { ctx.globalAlpha = 0.55; ctx.fillStyle = role[it.q.role]; ctx.beginPath(); ctx.arc(x, y, big ? 4.5 : 3.5, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+    else { const r = big ? 8 : 5.5; ctx.fillStyle = divColor(it.q.f); ctx.strokeStyle = css("--ink"); ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(x - r, y - r, 2 * r, 2 * r, 2); ctx.fill(); ctx.stroke(); }
+  }
+  if (big) {
+    label([tc[0], 0, tc[2] + TRASH_H[2] + 0.014], "手里的物体", css("--r-mover"));
+    FINGERS.forEach((c, i) => label([c[0], c[1], TIP_Z - 0.008], i ? "右指" : "左指", css("--r-gripper")));
+  }
+}
+let drag = null;
+cv.addEventListener("pointerdown", e => { drag = [e.clientX, e.clientY]; cv.setPointerCapture(e.pointerId); cv.style.cursor = "grabbing"; });
+cv.addEventListener("pointerup", () => { drag = null; cv.style.cursor = "grab"; });
+cv.addEventListener("pointermove", e => {
+  if (!drag) return;
+  view.yaw += (e.clientX - drag[0]) * 0.01;
+  view.pitch = Math.max(-1.4, Math.min(1.4, view.pitch + (e.clientY - drag[1]) * 0.01));
+  drag = [e.clientX, e.clientY]; draw();
+});
+cv.addEventListener("wheel", e => { e.preventDefault(); view.zoom = Math.max(0.4, Math.min(6, view.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); draw(); }, { passive: false });
+const bC = document.getElementById("vClose"), bA = document.getElementById("vAll");
+bC.onclick = () => { Object.assign(view, VIEWS.close); bC.classList.add("on"); bA.classList.remove("on"); draw(); };
+bA.onclick = () => { Object.assign(view, VIEWS.all); bA.classList.add("on"); bC.classList.remove("on"); draw(); };
+
+fit();
+show((parseInt(location.hash.slice(1)) || 1) - 1);
+})();
 </script>
 </body>
 </html>
