@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>海绵碰撞盒切块：结果汇报</title>
+<style>
+:root{
+  --paper:#F7F4EE;--card:#FFFFFF;--ink:#1C1B18;--ink2:#3B3832;--muted:#6F695F;
+  --line:#E4DED3;--line2:#CEC6B8;
+  --p1:#B0451E;--p1-soft:#F5E5DC;--p2:#14706A;--p2-soft:#DDEEEA;--p3:#3B4C9E;--p3-soft:#E2E5F4;
+  --gold:#A87A22;--gold-soft:#F3EAD6;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",Georgia,serif;
+  --sans:"Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,ui-monospace,monospace;
+  /* 两组 */
+  --base:#8A8376;--new:#14706A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#E9E4DA;overflow:hidden}
+body{color:var(--ink2);font-family:var(--sans)}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--paper);padding:84px 88px 68px;display:none;box-shadow:0 10px 40px rgba(40,30,10,.12)}
+.slide.on{display:block}
+.rule{width:56px;height:4px;background:var(--p1);border-radius:2px;margin-bottom:16px}
+.kicker{font:15px var(--mono);letter-spacing:.08em;color:var(--muted)}
+h1{font:700 44px/1.25 var(--serif);color:var(--ink);margin:8px 0 10px}
+.lead{font-size:23px;line-height:1.5;color:var(--ink2);margin:0}
+.lead b{color:var(--p2)}
+.cols{display:grid;grid-template-columns:960px 1fr;gap:40px;margin-top:30px}
+.view{background:var(--card);border:1px solid var(--line);border-radius:14px;height:560px;overflow:hidden}
+.view svg{width:100%;height:100%;display:block}
+.side{font-size:20px;line-height:1.6}
+.step{display:grid;grid-template-columns:36px 1fr;gap:12px;margin-bottom:26px}
+.step .n{width:32px;height:32px;border-radius:50%;background:var(--p2-soft);color:var(--p2);font:600 16px/32px var(--mono);text-align:center}
+.step b{color:var(--ink)}
+.key{font-size:16px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.key div{display:flex;align-items:center;gap:10px;margin:6px 0}
+.dot{width:12px;height:12px;border-radius:50%}
+.sq{width:16px;height:12px;border-radius:2px;border:2px solid}
+/* page 2 */
+.answer{margin-top:26px;background:var(--p2-soft);border-left:5px solid var(--p2);border-radius:0 12px 12px 0;padding:18px 26px;font-size:26px;color:var(--ink)}
+.answer b{color:var(--p2)}
+.charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:26px;margin-top:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px}
+.card h3{font:700 21px var(--serif);color:var(--ink);margin:0 0 2px}
+.card .q{font-size:15px;color:var(--muted);margin:0 0 14px}
+.row{display:grid;grid-template-columns:104px 1fr;align-items:center;gap:10px;margin:10px 0;font-size:16px}
+.row .lab{color:var(--muted);text-align:right}
+.track{position:relative;height:30px;border-left:1px solid var(--line2)}
+.bar{position:absolute;left:0;top:5px;height:20px;border-radius:0 4px 4px 0}
+.val{position:absolute;top:5px;line-height:20px;font:600 16px var(--mono);color:var(--ink);white-space:nowrap}
+.veto{position:absolute;top:0;bottom:0;border-left:2px dashed var(--p1)}
+.vnote{font-size:14px;color:var(--p1);margin:4px 0 0 114px}
+.legend{display:flex;gap:26px;font-size:16px;color:var(--ink2);margin-top:22px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:8px;vertical-align:-2px}
+.why{margin-top:22px}
+.why-h{font:700 19px var(--serif);color:var(--ink);margin-bottom:10px}
+.why-flow{display:grid;grid-template-columns:1fr 44px 1fr 44px 1fr;align-items:stretch}
+.why-c{background:var(--p3-soft);border-radius:12px;padding:12px 18px;font-size:16px;line-height:1.5;color:var(--ink2)}
+.why-t{display:block;font-weight:700;color:var(--p3);margin-bottom:2px}
+.why-t small{font:12px var(--mono);color:var(--muted);font-weight:400;margin-left:8px;padding:1px 6px;border:1px solid var(--line2);border-radius:5px}
+.why-a{align-self:center;text-align:center;font-size:15px;color:var(--muted)}
+.foot{position:absolute;left:88px;right:88px;bottom:34px;font-size:15px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+nav{position:fixed;right:20px;bottom:16px;display:flex;gap:8px;align-items:center;font:14px var(--mono);color:var(--muted);z-index:5}
+button{font:15px var(--sans);padding:6px 14px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink2);cursor:pointer}
+button:focus-visible{outline:2px solid var(--p3);outline-offset:2px}
+@media (max-width:900px){
+  html,body{overflow:auto;height:auto}
+  #stage{position:static;width:auto;height:auto;transform:none!important}
+  .slide{display:block;position:relative;padding:36px 18px;box-shadow:none}
+  .cols,.charts,.why-flow{grid-template-columns:1fr}
+  .view{height:auto}.foot{position:static;margin-top:20px}
+  nav{display:none}
+}
+@media print{html,body{overflow:visible;height:auto;background:#fff}#stage{position:static;transform:none!important}
+  .slide{display:block;position:relative;page-break-after:always;box-shadow:none}nav{display:none}}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<section class="slide on" id="p1" aria-label="第 1 页：改动">
+  <div class="rule"></div>
+  <div class="kicker">E-10 · 海绵擦砧板 · a2r issue #242 · PR #441 · 1 / 2 改动</div>
+  <h1>把海绵的碰撞盒从一整块切成 2×2 四块</h1>
+  <p class="lead">外形、重量、重心都不变；只是在物理引擎眼里从 <b>1 个形状</b>变成 <b>4 个</b>，各算各的接触点。</p>
+  <div class="cols">
+    <div class="view">
+      <svg viewBox="0 0 960 560" aria-label="侧视示意：一整块碰撞盒松手后下沉侧没有接触点、插进砧板；切成四块后下沉那块角上有接触点，被顶住">
+        <defs><marker id="up" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#14706A"/></marker></defs>
+        <!-- 上：原来 -->
+        <text x="36" y="46" font-size="22" font-weight="700" fill="#8A8376" font-family="Noto Serif SC,Songti SC,serif">原来：一整块</text>
+        <text x="36" y="72" font-size="15" fill="#6F695F">侧视，手指刚松开，海绵绕一条边轻轻翻</text>
+        <rect x="36" y="200" width="660" height="44" fill="#E9DFCB"/>
+        <text x="676" y="228" font-size="14" fill="#6F695F" text-anchor="end">砧板</text>
+        <g transform="rotate(-4 450 200)"><rect x="140" y="86" width="420" height="114" fill="#ECE9E3" stroke="#8A8376" stroke-width="3"/></g>
+        <circle cx="450" cy="200" r="7" fill="#1C1B18"/><circle cx="428" cy="200" r="7" fill="#1C1B18"/>
+        <text x="420" y="270" font-size="15" fill="#1C1B18">↑ 接触点都留在抬起这一侧</text>
+        <circle cx="146" cy="221" r="17" fill="none" stroke="#B0451E" stroke-width="2.5" stroke-dasharray="5 4"/>
+        <text x="60" y="270" font-size="16" fill="#B0451E" font-weight="600">下沉这侧没有接触点，插进板里约 3 mm</text>
+        <!-- 俯视小图 -->
+        <text x="830" y="80" font-size="14" fill="#6F695F" text-anchor="middle">俯视</text>
+        <rect x="760" y="96" width="140" height="100" fill="#ECE9E3" stroke="#8A8376" stroke-width="3"/>
+        <text x="830" y="222" font-size="14" fill="#6F695F" text-anchor="middle">1 个形状</text>
+
+        <line x1="36" y1="296" x2="924" y2="296" stroke="#E4DED3" stroke-width="1.5"/>
+
+        <!-- 下：现在 -->
+        <text x="36" y="338" font-size="22" font-weight="700" fill="#14706A" font-family="Noto Serif SC,Songti SC,serif">现在：切成 2×2</text>
+        <text x="36" y="364" font-size="15" fill="#6F695F">同样松手，同样轻轻翻</text>
+        <rect x="36" y="486" width="660" height="44" fill="#E9DFCB"/>
+        <text x="676" y="514" font-size="14" fill="#6F695F" text-anchor="end">砧板</text>
+        <g transform="rotate(-2.5 140 486)">
+          <rect x="140" y="372" width="210" height="114" fill="#DDEEEA" stroke="#14706A" stroke-width="3"/>
+          <rect x="350" y="372" width="210" height="114" fill="#DDEEEA" stroke="#14706A" stroke-width="3"/>
+        </g>
+        <circle cx="140" cy="486" r="7" fill="#1C1B18"/><circle cx="162" cy="486" r="7" fill="#1C1B18"/><circle cx="338" cy="486" r="7" fill="#1C1B18"/>
+        <line x1="120" y1="470" x2="120" y2="420" stroke="#14706A" stroke-width="3" marker-end="url(#up)"/>
+        <text x="60" y="552" font-size="16" fill="#14706A" font-weight="600">压下去的那块自己角上有点，马上被顶住</text>
+        <!-- 俯视小图 -->
+        <text x="830" y="372" font-size="14" fill="#6F695F" text-anchor="middle">俯视</text>
+        <rect x="760" y="388" width="140" height="100" fill="#DDEEEA" stroke="#14706A" stroke-width="3"/>
+        <line x1="830" y1="388" x2="830" y2="488" stroke="#14706A" stroke-width="2" stroke-dasharray="6 4"/>
+        <line x1="760" y1="438" x2="900" y2="438" stroke="#14706A" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="830" y="514" font-size="14" fill="#6F695F" text-anchor="middle">4 个形状，拼成同一外形</text>
+      </svg>
+    </div>
+    <div class="side">
+      <div class="step"><div class="n">1</div><div><b>问题</b>：机械臂放下海绵、手指松开后，海绵会插进砧板 2–3 mm。</div></div>
+      <div class="step"><div class="n">2</div><div><b>原因</b>：仿真只在少数“接触点”上出力，一整块时点都留在抬起的一侧。</div></div>
+      <div class="step"><div class="n">3</div><div><b>改动</b>：碰撞盒切成 4 块，每块自己生成接触点，哪侧往下压都顶得住。</div></div>
+      <div class="key">
+        <div><span class="dot" style="background:var(--ink)"></span>接触点（引擎只在这里出力）</div>
+        <div><span class="sq" style="border-color:var(--base);background:#ECE9E3"></span>原来的一整块碰撞盒</div>
+        <div><span class="sq" style="border-color:var(--new);background:var(--p2-soft)"></span>切开后的 4 块</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="p2" aria-label="第 2 页：结论">
+  <div class="rule"></div>
+  <div class="kicker">E-10 · 海绵擦砧板 · 2 / 2 结论</div>
+  <h1>切块以后，松手不再插进砧板</h1>
+  <div class="answer"><b>有效。</b>同样 339 个回合，最深插入从 3.4 mm 降到 0.3 mm；专家做完整个任务的成功率没有下降。</div>
+  <div class="legend">
+    <span><i style="background:var(--base)"></i>原来（一整块）</span>
+    <span><i style="background:var(--new)"></i>切成 2×2</span>
+  </div>
+  <div class="charts">
+    <div class="card" id="g1"><h3>最深插进板面多少</h3><p class="q">339 个回合里最深的一次 · 越短越好</p></div>
+    <div class="card" id="g2"><h3>插进超过 2 mm 的回合</h3><p class="q">339 个回合里有几次 · 越短越好</p></div>
+    <div class="card" id="g3"><h3>专家从 Home 做完整个任务</h3><p class="q">638 个起点，30 秒内做完几个 · 越长越好</p></div>
+  </div>
+  <div class="why">
+    <div class="why-h">原因分析（推测）</div>
+    <div class="why-flow">
+      <div class="why-c"><span class="why-t">本意</span>物理引擎为了省算力，会沿用上一步的接触点，物体动得够多才重新找点。</div>
+      <div class="why-a">但</div>
+      <div class="why-c"><span class="why-t">海绵太轻<small>已逐步实测</small></span>海绵只有 6 g，松手后只是轻轻翻；接触点停在抬起一侧 8 个小步，下沉侧插到 3 mm 才补上点。</div>
+      <div class="why-a">所以</div>
+      <div class="why-c"><span class="why-t">切块对症</span>4 块各自找点，压下去的那块马上有点。慢松手、减半步长、加重等 6 种改法没碰这一层，都没根治。</div>
+    </div>
+  </div>
+  <div class="foot">插入对比：3 个随机种子、339 个回合；成功率：2 组种子配对，基线是同一专家用一整块碰撞盒。这次只验证专家，没有训练 RL；切块后的逐个接触点记录还没重跑。</div>
+</section>
+
+</div>
+<nav><button type="button" id="prev" aria-label="上一页">←</button><span id="pg">1 / 2</span><button type="button" id="next" aria-label="下一页">→</button></nav>
+
+<script>
+(() => {
+"use strict";
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+function show(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, k) => { const on = k === cur; s.classList.toggle("on", on); s.toggleAttribute("inert", !on); s.setAttribute("aria-hidden", String(!on)); });
+  document.getElementById("pg").textContent = `${cur + 1} / ${slides.length}`;
+  history.replaceState(null, "", "#" + (cur + 1));
+}
+function fit() {
+  const s = Math.min(innerWidth / 1600, innerHeight / 900) * 0.96;
+  document.getElementById("stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+document.getElementById("prev").onclick = () => show(cur - 1);
+document.getElementById("next").onclick = () => show(cur + 1);
+addEventListener("keydown", e => {
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  if (e.key === "Home") show(0);
+  if (e.key === "End") show(slides.length - 1);
+});
+addEventListener("resize", fit);
+addEventListener("hashchange", () => show((parseInt(location.hash.slice(1)) || 1) - 1));
+
+const COL = { b: "var(--base)", n: "var(--new)" };
+const NAME = { b: "原来", n: "切成 2×2" };
+function bars(id, rows, max, fmt, veto) {
+  const el = document.getElementById(id);
+  for (const [k, v] of rows) {
+    const r = document.createElement("div"); r.className = "row";
+    r.innerHTML = `<div class="lab">${NAME[k]}</div><div class="track"></div>`;
+    const t = r.lastChild, w = v / max * 66;
+    t.innerHTML = `<div class="bar" title="${NAME[k]}：${fmt(v)}" style="width:${w}%;background:${COL[k]}"></div><span class="val" style="left:calc(${w}% + 8px)">${fmt(v)}</span>`;
+    if (veto != null) t.insertAdjacentHTML("beforeend", `<div class="veto" style="left:${veto / max * 66}%"></div>`);
+    el.appendChild(r);
+  }
+  if (veto != null) el.insertAdjacentHTML("beforeend", `<p class="vnote">红虚线：${veto} mm 否决线</p>`);
+}
+bars("g1", [["b", 3.43], ["n", 0.33]], 4, v => v.toFixed(2) + " mm", 3);
+bars("g2", [["b", 23], ["n", 0]], 30, v => v + " 次");
+bars("g3", [["b", 625], ["n", 633]], 638, v => v + " / 638");
+
+fit();
+show((parseInt(location.hash.slice(1)) || 1) - 1);
+})();
+</script>
+</body>
+</html>
