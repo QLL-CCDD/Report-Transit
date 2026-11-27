@@ -46,13 +46,14 @@ h1{font:700 46px/1.25 var(--serif);color:var(--ink);margin:8px 0 10px}
   <button type="button" data-go="sponge">海绵擦砧板</button>
   <button type="button" data-go="evo">Evo-DexBench</button>
   <button type="button" data-go="behavior">BEHAVIOR</button>
+  <button type="button" data-go="kettle">开水壶盖</button>
   <span class="hint">每份内 ← → 翻页</span>
 </header>
 <section class="pane on" id="cover"><main>
   <div class="rule"></div>
-  <div class="kicker">2026-11-27 · 4 项工作</div>
+  <div class="kicker">2026-11-27 · 5 项工作</div>
   <h1>本周汇报</h1>
-  <p class="lead">点开卡片或上方标签看每一项；每项 2–5 页，先讲改动，再讲结论。</p>
+  <p class="lead">点开卡片或上方标签看每一项；每项 1–5 页，先讲改动，再讲结论。</p>
   <div class="grid">
     <button type="button" class="item" data-go="e19" style="--c:var(--p1);--cs:var(--p1-soft)">
       <div class="n">E-19 · RL 特权输入</div><h2>夹爪指面 SDF：RL 没有学得更快</h2>
@@ -70,6 +71,10 @@ h1{font:700 46px/1.25 var(--serif);color:var(--ink);margin:8px 0 10px}
       <div class="n">RoboScope · BEHAVIOR</div><h2>100 个家务任务全部接通，评测提速 1.57 倍</h2>
       <p>平均分 0.410，作者自报 0.392；同样 16 题 14.3 → 22.4 动作/秒。</p>
       <span class="big">×1.57</span></button>
+    <button type="button" class="item" data-go="kettle" style="--c:var(--p2);--cs:var(--p2-soft)">
+      <div class="n">#244 · 任务修复，可推广</div><h2>远处空手移动不用接触时的低速，开壶盖回到 30 秒内</h2>
+      <p>30 秒内做完 16 → 115 / 117，p95 1252 → 595 步；顺带修好所有任务共用的起点摆放（第一轮物体被推开 7 cm）。</p>
+      <span class="big">16 → 115</span></button>
   </div>
 </main></section>
 <section class="pane" id="e19"><iframe title="e19-gripper-sdf-result-2026-11-26.html" srcdoc="<!doctype html>
@@ -1338,6 +1343,168 @@ function gpu(id, x0, sims) {
 }
 gpu(&quot;gB&quot;, 40, 2);
 gpu(&quot;gA&quot;, 500, 4);
+
+fit();
+show((parseInt(location.hash.slice(1)) || 1) - 1);
+})();
+</script>
+</body>
+</html>
+"></iframe></section>
+<section class="pane" id="kettle"><iframe title="issue244-kettle-lid-2026-11-27.html" srcdoc="<!doctype html>
+<html lang=&quot;zh-CN&quot;>
+<head>
+<meta charset=&quot;utf-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;>
+<title>开水壶盖提速：结果汇报</title>
+<style>
+:root{
+  --paper:#F7F4EE;--card:#FFFFFF;--ink:#1C1B18;--ink2:#3B3832;--muted:#6F695F;
+  --line:#E4DED3;--line2:#CEC6B8;
+  --p1:#B0451E;--p1-soft:#F5E5DC;--p2:#14706A;--p2-soft:#DDEEEA;--p3:#3B4C9E;--p3-soft:#E2E5F4;
+  --gold:#A87A22;--gold-soft:#F3EAD6;
+  --serif:&quot;Noto Serif SC&quot;,&quot;Source Han Serif SC&quot;,&quot;Songti SC&quot;,&quot;SimSun&quot;,Georgia,serif;
+  --sans:&quot;Inter&quot;,&quot;Noto Sans SC&quot;,&quot;PingFang SC&quot;,&quot;Microsoft YaHei&quot;,system-ui,sans-serif;
+  --mono:&quot;JetBrains Mono&quot;,&quot;Cascadia Code&quot;,Consolas,ui-monospace,monospace;
+  --base:#8A8376;--new:#14706A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#E9E4DA;overflow:hidden}
+body{color:var(--ink2);font-family:var(--sans)}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--paper);padding:72px 88px 68px;display:none;box-shadow:0 10px 40px rgba(40,30,10,.12)}
+.slide.on{display:block}
+.rule{width:56px;height:4px;background:var(--p1);border-radius:2px;margin-bottom:14px}
+.kicker{font:15px var(--mono);letter-spacing:.08em;color:var(--muted)}
+h1{font:700 40px/1.25 var(--serif);color:var(--ink);margin:8px 0 14px}
+.answer{background:var(--p2-soft);border-left:5px solid var(--p2);border-radius:0 12px 12px 0;padding:12px 24px;font-size:22px;color:var(--ink)}
+.answer b{color:var(--p2)}
+.cols{display:grid;grid-template-columns:960px 1fr;gap:40px;margin-top:20px}
+.view{background:var(--card);border:1px solid var(--line);border-radius:14px;height:300px;overflow:hidden}
+.view svg{width:100%;height:100%;display:block}
+.side{font-size:18px;line-height:1.55}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;margin-bottom:16px}
+.step .n{width:30px;height:30px;border-radius:50%;background:var(--p2-soft);color:var(--p2);font:600 15px/30px var(--mono);text-align:center}
+.step.g .n{background:var(--p3-soft);color:var(--p3)}
+.step b{color:var(--ink)}
+.charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:26px;margin-top:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 24px 10px}
+.card h3{font:700 20px var(--serif);color:var(--ink);margin:0 0 2px}
+.card .q{font-size:14px;color:var(--muted);margin:0 0 6px}
+.card.g{border-top:4px solid var(--p3)}
+.row{display:grid;grid-template-columns:90px 1fr;align-items:center;gap:10px;margin:8px 0;font-size:16px}
+.row .lab{color:var(--muted);text-align:right}
+.track{position:relative;height:28px;border-left:1px solid var(--line2)}
+.bar{position:absolute;left:0;top:4px;height:20px;border-radius:0 4px 4px 0}
+.val{position:absolute;top:4px;line-height:20px;font:600 16px var(--mono);color:var(--ink);white-space:nowrap}
+.foot{position:absolute;left:88px;right:88px;bottom:30px;font-size:15px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+nav{position:fixed;right:20px;bottom:16px;display:flex;gap:8px;align-items:center;font:14px var(--mono);color:var(--muted);z-index:5}
+button{font:15px var(--sans);padding:6px 14px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink2);cursor:pointer}
+button:focus-visible{outline:2px solid var(--p3);outline-offset:2px}
+@media (max-width:900px){
+  html,body{overflow:auto;height:auto}
+  #stage{position:static;width:auto;height:auto;transform:none!important}
+  .slide{display:block;position:relative;padding:36px 18px;box-shadow:none}
+  .cols,.charts{grid-template-columns:1fr}
+  .view{height:auto}.foot{position:static;margin-top:20px}
+  nav{display:none}
+}
+@media print{html,body{overflow:visible;height:auto;background:#fff}#stage{position:static;transform:none!important}
+  .slide{display:block;position:relative;page-break-after:always;box-shadow:none}nav{display:none}}
+</style>
+</head>
+<body>
+<div id=&quot;stage&quot;>
+
+<section class=&quot;slide on&quot; id=&quot;p1&quot; aria-label=&quot;第 1 页：改动与结论&quot;>
+  <div class=&quot;rule&quot;></div>
+  <div class=&quot;kicker&quot;>E-10 · 开水壶盖 · a2r issue #244 · PR #409 / #422 / #425 · 已合入</div>
+  <h1>远处的空手移动不用接触时的低速：30 秒内做完 16 → 115 个</h1>
+  <div class=&quot;answer&quot;><b>有效。</b>同一批 117 个起点，专家做完整题的 p95 从 1252 步降到 595 步，回到 30 秒（900 步）以内；宽范围成功率不降。</div>
+  <div class=&quot;cols&quot;>
+    <div class=&quot;view&quot;>
+      <svg viewBox=&quot;0 0 960 300&quot; aria-label=&quot;一局的时间分配：原来空手移到按钮上方占约四分之三，总长超过 900 步；提速后这一段缩短到约三分之一，总长约 600 步&quot;>
+        <text x=&quot;32&quot; y=&quot;36&quot; font-size=&quot;19&quot; font-weight=&quot;700&quot; fill=&quot;#1C1B18&quot; font-family=&quot;Noto Serif SC,Songti SC,serif&quot;>一局怎么花时间（p95 那一局）</text>
+        <text x=&quot;928&quot; y=&quot;36&quot; font-size=&quot;14&quot; fill=&quot;#6F695F&quot; text-anchor=&quot;end&quot;>越短越好</text>
+        <!-- 900 line: x = 120 + s*0.62 -->
+        <line x1=&quot;678&quot; y1=&quot;54&quot; x2=&quot;678&quot; y2=&quot;250&quot; stroke=&quot;#B0451E&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;6 5&quot;/>
+        <text x=&quot;684&quot; y=&quot;68&quot; font-size=&quot;14&quot; fill=&quot;#B0451E&quot;>900 步 = 30 秒上限</text>
+        <text x=&quot;110&quot; y=&quot;116&quot; font-size=&quot;17&quot; fill=&quot;#8A8376&quot; text-anchor=&quot;end&quot; font-weight=&quot;600&quot;>原来</text>
+        <rect x=&quot;120&quot; y=&quot;88&quot; width=&quot;598&quot; height=&quot;46&quot; fill=&quot;#8A8376&quot;/>
+        <rect x=&quot;718&quot; y=&quot;88&quot; width=&quot;178&quot; height=&quot;46&quot; fill=&quot;#CFC9BE&quot;/>
+        <text x=&quot;419&quot; y=&quot;117&quot; font-size=&quot;16&quot; fill=&quot;#FFFFFF&quot; text-anchor=&quot;middle&quot;>空手移到按钮上方 · 约 3/4</text>
+        <text x=&quot;807&quot; y=&quot;117&quot; font-size=&quot;15&quot; fill=&quot;#3B3832&quot; text-anchor=&quot;middle&quot;>按、开盖</text>
+        <text x=&quot;900&quot; y=&quot;156&quot; font-size=&quot;15&quot; fill=&quot;#1C1B18&quot; text-anchor=&quot;end&quot; font-family=&quot;JetBrains Mono,monospace&quot;>1252 步</text>
+        <text x=&quot;110&quot; y=&quot;206&quot; font-size=&quot;17&quot; fill=&quot;#14706A&quot; text-anchor=&quot;end&quot; font-weight=&quot;600&quot;>现在</text>
+        <rect x=&quot;120&quot; y=&quot;178&quot; width=&quot;199&quot; height=&quot;46&quot; fill=&quot;#14706A&quot;/>
+        <rect x=&quot;319&quot; y=&quot;178&quot; width=&quot;170&quot; height=&quot;46&quot; fill=&quot;#9CCFC8&quot;/>
+        <text x=&quot;220&quot; y=&quot;207&quot; font-size=&quot;16&quot; fill=&quot;#FFFFFF&quot; text-anchor=&quot;middle&quot;>速度 ×3</text>
+        <text x=&quot;404&quot; y=&quot;207&quot; font-size=&quot;15&quot; fill=&quot;#1C1B18&quot; text-anchor=&quot;middle&quot;>按、开盖（不变）</text>
+        <text x=&quot;498&quot; y=&quot;207&quot; font-size=&quot;15&quot; fill=&quot;#1C1B18&quot; font-family=&quot;JetBrains Mono,monospace&quot;>595 步</text>
+        <g font-size=&quot;13&quot; fill=&quot;#6F695F&quot; font-family=&quot;JetBrains Mono,monospace&quot; text-anchor=&quot;middle&quot;>
+          <line x1=&quot;120&quot; y1=&quot;250&quot; x2=&quot;900&quot; y2=&quot;250&quot; stroke=&quot;#CEC6B8&quot;/>
+          <text x=&quot;120&quot; y=&quot;270&quot;>0</text><text x=&quot;306&quot; y=&quot;270&quot;>300</text><text x=&quot;492&quot; y=&quot;270&quot;>600</text><text x=&quot;678&quot; y=&quot;270&quot;>900</text><text x=&quot;864&quot; y=&quot;270&quot;>1200</text>
+        </g>
+        <text x=&quot;32&quot; y=&quot;290&quot; font-size=&quot;13&quot; fill=&quot;#A87A22&quot;>“现在”一行的两段长度按 3 倍速度估算，总长是实测</text>
+      </svg>
+    </div>
+    <div class=&quot;side&quot;>
+      <div class=&quot;step&quot;><div class=&quot;n&quot;>1</div><div><b>问题</b>：从起始姿态空手移到按钮上方，用的是按按钮时的 1 cm/s，这段占全程约 3/4。</div></div>
+      <div class=&quot;step&quot;><div class=&quot;n&quot;>2</div><div><b>改动</b>：只把这段的移动和转腕速度一起提到 3 倍，接触按钮和开盖不动。</div></div>
+      <div class=&quot;step g&quot;><div class=&quot;n&quot;>3</div><div><b>可推广</b>：远离接触面的移动不照抄接触时的低速，已写进专家手册；顺带修好所有任务共用的起点摆放：每批第一轮物体会被推开（右下图）。</div></div>
+    </div>
+  </div>
+  <div class=&quot;charts&quot;>
+    <div class=&quot;card&quot; id=&quot;g1&quot;><h3>30 秒内做完整题</h3><p class=&quot;q&quot;>117 个可行起点里做完几个 · 越长越好</p></div>
+    <div class=&quot;card&quot; id=&quot;g2&quot;><h3>宽范围起点成功</h3><p class=&quot;q&quot;>102 个起点里成功几个 · 越长越好</p></div>
+    <div class=&quot;card g&quot; id=&quot;g3&quot;><h3>所有任务通用：第一轮摆好后物体被推开</h3><p class=&quot;q&quot;>静置时水壶最大位移 · 越短越好</p></div>
+  </div>
+  <div class=&quot;foot&quot;>条件：1 个预先登记的种子（8 轮 512 个提案，117 个可行起点），基线是同一台机器上的原专家；宽范围 3 个种子；位移来自 1 个种子的诊断；只验证专家，没有训练 RL；摆放修复只在开壶盖、推垃圾两题上查过，其余任务未查。</div>
+</section>
+
+</div>
+<nav><button type=&quot;button&quot; id=&quot;prev&quot; aria-label=&quot;上一页&quot;>←</button><span id=&quot;pg&quot;>1 / 1</span><button type=&quot;button&quot; id=&quot;next&quot; aria-label=&quot;下一页&quot;>→</button></nav>
+
+<script>
+(() => {
+&quot;use strict&quot;;
+const slides = [...document.querySelectorAll(&quot;.slide&quot;)];
+let cur = 0;
+function show(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, k) => { const on = k === cur; s.classList.toggle(&quot;on&quot;, on); s.toggleAttribute(&quot;inert&quot;, !on); s.setAttribute(&quot;aria-hidden&quot;, String(!on)); });
+  document.getElementById(&quot;pg&quot;).textContent = `${cur + 1} / ${slides.length}`;
+  history.replaceState(null, &quot;&quot;, &quot;#&quot; + (cur + 1));
+}
+function fit() {
+  const s = Math.min(innerWidth / 1600, innerHeight / 900) * 0.96;
+  document.getElementById(&quot;stage&quot;).style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+document.getElementById(&quot;prev&quot;).onclick = () => show(cur - 1);
+document.getElementById(&quot;next&quot;).onclick = () => show(cur + 1);
+addEventListener(&quot;keydown&quot;, e => {
+  if ([&quot;ArrowRight&quot;, &quot;PageDown&quot;, &quot; &quot;].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if ([&quot;ArrowLeft&quot;, &quot;PageUp&quot;].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  if (e.key === &quot;Home&quot;) show(0);
+  if (e.key === &quot;End&quot;) show(slides.length - 1);
+});
+addEventListener(&quot;resize&quot;, fit);
+addEventListener(&quot;hashchange&quot;, () => show((parseInt(location.hash.slice(1)) || 1) - 1));
+
+const COL = { b: &quot;var(--base)&quot;, n: &quot;var(--new)&quot;, f: &quot;var(--p3)&quot; };
+function bars(id, rows, max, fmt) {
+  const el = document.getElementById(id);
+  for (const [k, name, v] of rows) {
+    const r = document.createElement(&quot;div&quot;); r.className = &quot;row&quot;;
+    r.innerHTML = `<div class=&quot;lab&quot;>${name}</div><div class=&quot;track&quot;></div>`;
+    const t = r.lastChild, w = Math.max(v / max * 66, 0.6);
+    t.innerHTML = `<div class=&quot;bar&quot; title=&quot;${name}：${fmt(v)}&quot; style=&quot;width:${w}%;background:${COL[k]}&quot;></div><span class=&quot;val&quot; style=&quot;left:calc(${w}% + 8px)&quot;>${fmt(v)}</span>`;
+    el.appendChild(r);
+  }
+}
+bars(&quot;g1&quot;, [[&quot;b&quot;, &quot;原来&quot;, 16], [&quot;n&quot;, &quot;提速后&quot;, 115]], 117, v => v + &quot; / 117&quot;);
+bars(&quot;g2&quot;, [[&quot;b&quot;, &quot;原来&quot;, 99], [&quot;n&quot;, &quot;提速后&quot;, 99]], 102, v => v + &quot; / 102&quot;);
+bars(&quot;g3&quot;, [[&quot;b&quot;, &quot;原来&quot;, 7.4], [&quot;f&quot;, &quot;修复后&quot;, 0]], 8, v => v.toFixed(1) + &quot; cm&quot;);
 
 fit();
 show((parseInt(location.hash.slice(1)) || 1) - 1);

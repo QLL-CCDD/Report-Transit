@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>开水壶盖提速：结果汇报</title>
+<style>
+:root{
+  --paper:#F7F4EE;--card:#FFFFFF;--ink:#1C1B18;--ink2:#3B3832;--muted:#6F695F;
+  --line:#E4DED3;--line2:#CEC6B8;
+  --p1:#B0451E;--p1-soft:#F5E5DC;--p2:#14706A;--p2-soft:#DDEEEA;--p3:#3B4C9E;--p3-soft:#E2E5F4;
+  --gold:#A87A22;--gold-soft:#F3EAD6;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",Georgia,serif;
+  --sans:"Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,ui-monospace,monospace;
+  --base:#8A8376;--new:#14706A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#E9E4DA;overflow:hidden}
+body{color:var(--ink2);font-family:var(--sans)}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--paper);padding:72px 88px 68px;display:none;box-shadow:0 10px 40px rgba(40,30,10,.12)}
+.slide.on{display:block}
+.rule{width:56px;height:4px;background:var(--p1);border-radius:2px;margin-bottom:14px}
+.kicker{font:15px var(--mono);letter-spacing:.08em;color:var(--muted)}
+h1{font:700 40px/1.25 var(--serif);color:var(--ink);margin:8px 0 14px}
+.answer{background:var(--p2-soft);border-left:5px solid var(--p2);border-radius:0 12px 12px 0;padding:12px 24px;font-size:22px;color:var(--ink)}
+.answer b{color:var(--p2)}
+.cols{display:grid;grid-template-columns:960px 1fr;gap:40px;margin-top:20px}
+.view{background:var(--card);border:1px solid var(--line);border-radius:14px;height:300px;overflow:hidden}
+.view svg{width:100%;height:100%;display:block}
+.side{font-size:18px;line-height:1.55}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;margin-bottom:16px}
+.step .n{width:30px;height:30px;border-radius:50%;background:var(--p2-soft);color:var(--p2);font:600 15px/30px var(--mono);text-align:center}
+.step.g .n{background:var(--p3-soft);color:var(--p3)}
+.step b{color:var(--ink)}
+.charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:26px;margin-top:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 24px 10px}
+.card h3{font:700 20px var(--serif);color:var(--ink);margin:0 0 2px}
+.card .q{font-size:14px;color:var(--muted);margin:0 0 6px}
+.card.g{border-top:4px solid var(--p3)}
+.row{display:grid;grid-template-columns:90px 1fr;align-items:center;gap:10px;margin:8px 0;font-size:16px}
+.row .lab{color:var(--muted);text-align:right}
+.track{position:relative;height:28px;border-left:1px solid var(--line2)}
+.bar{position:absolute;left:0;top:4px;height:20px;border-radius:0 4px 4px 0}
+.val{position:absolute;top:4px;line-height:20px;font:600 16px var(--mono);color:var(--ink);white-space:nowrap}
+.foot{position:absolute;left:88px;right:88px;bottom:30px;font-size:15px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+nav{position:fixed;right:20px;bottom:16px;display:flex;gap:8px;align-items:center;font:14px var(--mono);color:var(--muted);z-index:5}
+button{font:15px var(--sans);padding:6px 14px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink2);cursor:pointer}
+button:focus-visible{outline:2px solid var(--p3);outline-offset:2px}
+@media (max-width:900px){
+  html,body{overflow:auto;height:auto}
+  #stage{position:static;width:auto;height:auto;transform:none!important}
+  .slide{display:block;position:relative;padding:36px 18px;box-shadow:none}
+  .cols,.charts{grid-template-columns:1fr}
+  .view{height:auto}.foot{position:static;margin-top:20px}
+  nav{display:none}
+}
+@media print{html,body{overflow:visible;height:auto;background:#fff}#stage{position:static;transform:none!important}
+  .slide{display:block;position:relative;page-break-after:always;box-shadow:none}nav{display:none}}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<section class="slide on" id="p1" aria-label="第 1 页：改动与结论">
+  <div class="rule"></div>
+  <div class="kicker">E-10 · 开水壶盖 · a2r issue #244 · PR #409 / #422 / #425 · 已合入</div>
+  <h1>远处的空手移动不用接触时的低速：30 秒内做完 16 → 115 个</h1>
+  <div class="answer"><b>有效。</b>同一批 117 个起点，专家做完整题的 p95 从 1252 步降到 595 步，回到 30 秒（900 步）以内；宽范围成功率不降。</div>
+  <div class="cols">
+    <div class="view">
+      <svg viewBox="0 0 960 300" aria-label="一局的时间分配：原来空手移到按钮上方占约四分之三，总长超过 900 步；提速后这一段缩短到约三分之一，总长约 600 步">
+        <text x="32" y="36" font-size="19" font-weight="700" fill="#1C1B18" font-family="Noto Serif SC,Songti SC,serif">一局怎么花时间（p95 那一局）</text>
+        <text x="928" y="36" font-size="14" fill="#6F695F" text-anchor="end">越短越好</text>
+        <!-- 900 line: x = 120 + s*0.62 -->
+        <line x1="678" y1="54" x2="678" y2="250" stroke="#B0451E" stroke-width="2" stroke-dasharray="6 5"/>
+        <text x="684" y="68" font-size="14" fill="#B0451E">900 步 = 30 秒上限</text>
+        <text x="110" y="116" font-size="17" fill="#8A8376" text-anchor="end" font-weight="600">原来</text>
+        <rect x="120" y="88" width="598" height="46" fill="#8A8376"/>
+        <rect x="718" y="88" width="178" height="46" fill="#CFC9BE"/>
+        <text x="419" y="117" font-size="16" fill="#FFFFFF" text-anchor="middle">空手移到按钮上方 · 约 3/4</text>
+        <text x="807" y="117" font-size="15" fill="#3B3832" text-anchor="middle">按、开盖</text>
+        <text x="900" y="156" font-size="15" fill="#1C1B18" text-anchor="end" font-family="JetBrains Mono,monospace">1252 步</text>
+        <text x="110" y="206" font-size="17" fill="#14706A" text-anchor="end" font-weight="600">现在</text>
+        <rect x="120" y="178" width="199" height="46" fill="#14706A"/>
+        <rect x="319" y="178" width="170" height="46" fill="#9CCFC8"/>
+        <text x="220" y="207" font-size="16" fill="#FFFFFF" text-anchor="middle">速度 ×3</text>
+        <text x="404" y="207" font-size="15" fill="#1C1B18" text-anchor="middle">按、开盖（不变）</text>
+        <text x="498" y="207" font-size="15" fill="#1C1B18" font-family="JetBrains Mono,monospace">595 步</text>
+        <g font-size="13" fill="#6F695F" font-family="JetBrains Mono,monospace" text-anchor="middle">
+          <line x1="120" y1="250" x2="900" y2="250" stroke="#CEC6B8"/>
+          <text x="120" y="270">0</text><text x="306" y="270">300</text><text x="492" y="270">600</text><text x="678" y="270">900</text><text x="864" y="270">1200</text>
+        </g>
+        <text x="32" y="290" font-size="13" fill="#A87A22">“现在”一行的两段长度按 3 倍速度估算，总长是实测</text>
+      </svg>
+    </div>
+    <div class="side">
+      <div class="step"><div class="n">1</div><div><b>问题</b>：从起始姿态空手移到按钮上方，用的是按按钮时的 1 cm/s，这段占全程约 3/4。</div></div>
+      <div class="step"><div class="n">2</div><div><b>改动</b>：只把这段的移动和转腕速度一起提到 3 倍，接触按钮和开盖不动。</div></div>
+      <div class="step g"><div class="n">3</div><div><b>可推广</b>：远离接触面的移动不照抄接触时的低速，已写进专家手册；顺带修好所有任务共用的起点摆放：每批第一轮物体会被推开（右下图）。</div></div>
+    </div>
+  </div>
+  <div class="charts">
+    <div class="card" id="g1"><h3>30 秒内做完整题</h3><p class="q">117 个可行起点里做完几个 · 越长越好</p></div>
+    <div class="card" id="g2"><h3>宽范围起点成功</h3><p class="q">102 个起点里成功几个 · 越长越好</p></div>
+    <div class="card g" id="g3"><h3>所有任务通用：第一轮摆好后物体被推开</h3><p class="q">静置时水壶最大位移 · 越短越好</p></div>
+  </div>
+  <div class="foot">条件：1 个预先登记的种子（8 轮 512 个提案，117 个可行起点），基线是同一台机器上的原专家；宽范围 3 个种子；位移来自 1 个种子的诊断；只验证专家，没有训练 RL；摆放修复只在开壶盖、推垃圾两题上查过，其余任务未查。</div>
+</section>
+
+</div>
+<nav><button type="button" id="prev" aria-label="上一页">←</button><span id="pg">1 / 1</span><button type="button" id="next" aria-label="下一页">→</button></nav>
+
+<script>
+(() => {
+"use strict";
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+function show(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, k) => { const on = k === cur; s.classList.toggle("on", on); s.toggleAttribute("inert", !on); s.setAttribute("aria-hidden", String(!on)); });
+  document.getElementById("pg").textContent = `${cur + 1} / ${slides.length}`;
+  history.replaceState(null, "", "#" + (cur + 1));
+}
+function fit() {
+  const s = Math.min(innerWidth / 1600, innerHeight / 900) * 0.96;
+  document.getElementById("stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+document.getElementById("prev").onclick = () => show(cur - 1);
+document.getElementById("next").onclick = () => show(cur + 1);
+addEventListener("keydown", e => {
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  if (e.key === "Home") show(0);
+  if (e.key === "End") show(slides.length - 1);
+});
+addEventListener("resize", fit);
+addEventListener("hashchange", () => show((parseInt(location.hash.slice(1)) || 1) - 1));
+
+const COL = { b: "var(--base)", n: "var(--new)", f: "var(--p3)" };
+function bars(id, rows, max, fmt) {
+  const el = document.getElementById(id);
+  for (const [k, name, v] of rows) {
+    const r = document.createElement("div"); r.className = "row";
+    r.innerHTML = `<div class="lab">${name}</div><div class="track"></div>`;
+    const t = r.lastChild, w = Math.max(v / max * 66, 0.6);
+    t.innerHTML = `<div class="bar" title="${name}：${fmt(v)}" style="width:${w}%;background:${COL[k]}"></div><span class="val" style="left:calc(${w}% + 8px)">${fmt(v)}</span>`;
+    el.appendChild(r);
+  }
+}
+bars("g1", [["b", "原来", 16], ["n", "提速后", 115]], 117, v => v + " / 117");
+bars("g2", [["b", "原来", 99], ["n", "提速后", 99]], 102, v => v + " / 102");
+bars("g3", [["b", "原来", 7.4], ["f", "修复后", 0]], 8, v => v.toFixed(1) + " cm");
+
+fit();
+show((parseInt(location.hash.slice(1)) || 1) - 1);
+})();
+</script>
+</body>
+</html>
