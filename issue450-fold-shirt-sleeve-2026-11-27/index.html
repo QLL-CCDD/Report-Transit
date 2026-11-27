@@ -1,0 +1,9 @@
+<!doctype html><html lang="zh"><meta charset="utf-8"><title>叠衣服袖子 任务示意（a2r #450）</title>
+<style>body{font-family:Georgia,"Songti SC",serif;background:#faf8f3;color:#222;max-width:1000px;margin:2em auto;padding:0 1em;line-height:1.6}video{width:100%;border:1px solid #ccc;margin:.5em 0 1.5em}h1{font-weight:normal}code{background:#eee;padding:0 .3em}</style>
+<h1>叠衣服袖子 <code>cloth/fold_shirt_sleeve</code>：任务示意</h1>
+<p>任务：Piper X 抓住长袖上衣一只袖口，抬过衣身，把袖子叠到衣身右胸处再松手；松手后袖口要留在衣身上（成功判据 <code>cuff_across</code>、<code>sleeve_on_body</code>，并且手已抬离）。</p>
+<p>录制：2026-11-27，main <code>4e621c36f</code>，Isaac Sim 5.1，现行专家，固定第三人称相机。8 个随机起点（难度 1.0），8 个全部成功，这里放其中两个：最短的 278 步、最长的 570 步。</p>
+<p>注意：这两段是从上游起点出发的成功示例，不是 #450 里失败的情况。#450 的问题出在 Home 起点普查：62 行可行里成功 46–52 行（目标 95%），失败的回合是松手、手往上抬的时候，袖口还粘在张开的指垫上，被一起带离衣身。</p>
+<h2>起点 0（278 步）</h2><video src="expert-env0.mp4" controls loop muted></video>
+<h2>起点 3（570 步）</h2><video src="expert-env3.mp4" controls loop muted></video>
+</html>
