@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>扫方块（a2r #451）任务示意 2026-11-27</title>
+<style>body{font-family:Georgia,"Noto Serif SC",serif;background:#faf8f3;color:#222;max-width:1100px;margin:2em auto;padding:0 1em;line-height:1.6}
+h1,h2{font-weight:600}video{width:100%;border:1px solid #ddd;background:#000}.g{display:grid;grid-template-columns:1fr 1fr;gap:1.2em}
+.c p{margin:.3em 0 .1em}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:.3em .6em}.n{color:#666;font-size:.92em}</style></head><body>
+<h1>扫方块 <code>place/sweep_blocks</code>：任务示意（a2r #451）</h1>
+<p>任务：Piper X 先拿起刷子，再把桌上散着的 3–5 个方块逐个扫进簸箕，全部进入簸箕就算成功。左边是整体视角，右边是近景。</p>
+<p class="n">录制条件：收尾第 2 次修复后的专家（<code>09fbbd570</code>，方块离底座至少 0.28 m，先抬刷再倾斜），物理参数 d7，种子 1，16 个回合。<b>起点是 pregrasp</b>，即机械臂已停在刷柄附近；不是从 Home 起跑，每回合上限 1350 步。结果是 13/16 成功，成功回合用了 391–775 步。这个数字<b>不能</b>和 Home 验收的 39/54（72%）直接对比。</p>
+<h2>成功</h2><div class="g">
+<div class="c"><p>env 7：391 步，最快的一回合</p><video controls loop muted src="videos/env7.mp4"></video></div>
+<div class="c"><p>env 5：775 步，最慢的一回合（每块方块都要单独往返一趟）</p><video controls loop muted src="videos/env5.mp4"></video></div></div>
+<h2>失败（都是 1350 步超时）</h2><div class="g">
+<div class="c"><p>env 8：只剩最后一块，它被刷子压在簸箕口，没能推进去</p><video controls loop muted src="videos/env8.mp4"></video></div>
+<div class="c"><p>env 9：手腕扭到很大角度，桌上还剩 3 块没扫</p><video controls loop muted src="videos/env9.mp4"></video></div>
+<div class="c"><p>env 10：4 块排在簸箕口外，刷子悬在上方，一直没往里推</p><video controls loop muted src="videos/env10.mp4"></video></div></div>
+<h2>现状（Home 验收，验收线：成功 ≥ 90%、未完成 ≤ 5%、p95 ≤ 900 步）</h2>
+<table><tr><th>版本</th><th>成功</th><th>未完成</th><th>p95</th></tr>
+<tr><td>普查（改之前）</td><td>33/54 61%</td><td>19 越界 + 2 超时</td><td>954</td></tr>
+<tr><td>第 1 次：刷子等在离方块更近的位置</td><td>37/54 69%</td><td>16 越界</td><td>947</td></tr>
+<tr><td>第 2 次：方块离底座最小距离 0.22→0.28 m，先抬后倾</td><td>39/54 72%</td><td>8 越界 + 7 超时</td><td>1118</td></tr></table>
+<p>一句话说明主要问题：刷子又长，手腕关节又容易顶到极限，扫的时候不是扫进底座周围的禁区，就是卡住不动；每块方块单独往返一趟，整体也太慢。目前标为“待人工”，下一步需要用户决定。</p>
+</body></html>
