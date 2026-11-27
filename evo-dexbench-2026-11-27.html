@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evo-DexBench：加速与基线汇报</title>
+<style>
+:root{
+  --paper:#F7F4EE;--card:#FFFFFF;--ink:#1C1B18;--ink2:#3B3832;--muted:#6F695F;
+  --line:#E4DED3;--line2:#CEC6B8;
+  --p1:#B0451E;--p1-soft:#F5E5DC;--p2:#14706A;--p2-soft:#DDEEEA;--p3:#3B4C9E;--p3-soft:#E2E5F4;
+  --gold:#A87A22;--gold-soft:#F3EAD6;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",Georgia,serif;
+  --sans:"Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,ui-monospace,monospace;
+  /* 组：原来 / 改后；原生 / Kit */
+  --base:#8A8376;--new:#B0451E;--kit:#14706A;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#E9E4DA;overflow:hidden}
+body{color:var(--ink2);font-family:var(--sans)}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--paper);padding:84px 88px 68px;display:none;box-shadow:0 10px 40px rgba(40,30,10,.12)}
+.slide.on{display:block}
+.rule{width:56px;height:4px;background:var(--p1);border-radius:2px;margin-bottom:16px}
+.rule.c2{background:var(--p2)}
+.kicker{font:15px var(--mono);letter-spacing:.08em;color:var(--muted)}
+.kicker .ch{color:var(--p1);font-weight:600}
+.kicker .ch.c2{color:var(--p2)}
+h1{font:700 44px/1.25 var(--serif);color:var(--ink);margin:8px 0 10px}
+.lead{font-size:23px;line-height:1.5;color:var(--ink2);margin:0}
+.lead b{color:var(--p1)}
+.cols{display:grid;grid-template-columns:960px 1fr;gap:40px;margin-top:30px}
+.view{background:var(--card);border:1px solid var(--line);border-radius:14px;height:560px;overflow:hidden}
+.view svg{width:100%;height:100%;display:block}
+.side{font-size:20px;line-height:1.6}
+.step{display:grid;grid-template-columns:36px 1fr;gap:12px;margin-bottom:26px}
+.step .n{width:32px;height:32px;border-radius:50%;background:var(--p1-soft);color:var(--p1);font:600 16px/32px var(--mono);text-align:center}
+.step b{color:var(--ink)}
+.key{font-size:16px;color:var(--muted);margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.key div{display:flex;align-items:center;gap:10px;margin:6px 0}
+.sw{width:16px;height:12px;border-radius:2px}
+/* 结论页 */
+.answer{margin-top:26px;background:var(--p1-soft);border-left:5px solid var(--p1);border-radius:0 12px 12px 0;padding:18px 26px;font-size:26px;color:var(--ink)}
+.answer b{color:var(--p1)}
+.answer.c2{background:var(--p2-soft);border-color:var(--p2)}
+.answer.c2 b{color:var(--p2)}
+.charts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:26px;margin-top:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 26px}
+.card h3{font:700 21px var(--serif);color:var(--ink);margin:0 0 2px}
+.card .q{font-size:15px;color:var(--muted);margin:0 0 14px}
+.grp{font:13px var(--mono);color:var(--muted);letter-spacing:.06em;margin:12px 0 0 114px}
+.row{display:grid;grid-template-columns:104px 1fr;align-items:center;gap:10px;margin:6px 0;font-size:16px}
+.row .lab{color:var(--muted);text-align:right}
+.track{position:relative;height:30px;border-left:1px solid var(--line2)}
+.bar{position:absolute;left:0;top:5px;height:20px;border-radius:0 4px 4px 0}
+.val{position:absolute;top:5px;line-height:20px;font:600 16px var(--mono);color:var(--ink);white-space:nowrap}
+.veto{position:absolute;top:0;bottom:0;border-left:2px dashed var(--p1)}
+.vnote{font-size:14px;color:var(--p1);margin:6px 0 0 114px}
+.legend{display:flex;gap:26px;font-size:16px;color:var(--ink2);margin-top:22px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:8px;vertical-align:-2px}
+.why{margin-top:18px}
+.why-h{font:700 19px var(--serif);color:var(--ink);margin-bottom:10px}
+.why-flow{display:grid;grid-template-columns:1fr 44px 1fr 44px 1fr;align-items:stretch}
+.why-c{background:var(--p3-soft);border-radius:12px;padding:12px 18px;font-size:16px;line-height:1.5;color:var(--ink2)}
+.why-t{display:block;font-weight:700;color:var(--p3);margin-bottom:2px}
+.why-t small{font:12px var(--mono);color:var(--muted);font-weight:400;margin-left:8px;padding:1px 6px;border:1px solid var(--line2);border-radius:5px}
+.why-a{align-self:center;text-align:center;font-size:15px;color:var(--muted)}
+.tag{white-space:nowrap;font:12px var(--mono);padding:1px 7px;border-radius:5px;margin-left:8px;vertical-align:3px}
+.tag.gold{color:var(--gold);background:var(--gold-soft);border:1px solid #E2CFA4}
+/* 第二章 */
+.grid2{display:grid;grid-template-columns:1000px 1fr;gap:26px;margin-top:20px}
+.zsvg{width:100%;height:410px;display:block}
+.prog{margin:16px 0 4px;height:26px;border-radius:6px;background:var(--line);position:relative;overflow:hidden}
+.prog i{position:absolute;left:0;top:0;bottom:0;background:var(--kit)}
+.prog span{position:absolute;right:10px;top:0;line-height:26px;font:600 15px var(--mono);color:var(--ink)}
+.pl{font-size:16px;color:var(--ink2);margin-top:14px}
+.pl b{color:var(--ink)}
+.note{font-size:15px;line-height:1.55;color:var(--muted);margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.foot{position:absolute;left:88px;right:88px;bottom:34px;font-size:15px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+nav{position:fixed;right:20px;bottom:16px;display:flex;gap:8px;align-items:center;font:14px var(--mono);color:var(--muted);z-index:5}
+button{font:15px var(--sans);padding:6px 14px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink2);cursor:pointer}
+button:focus-visible{outline:2px solid var(--p3);outline-offset:2px}
+@media (max-width:900px){
+  html,body{overflow:auto;height:auto}
+  #stage{position:static;width:auto;height:auto;transform:none!important}
+  .slide{display:block;position:relative;padding:36px 18px;box-shadow:none}
+  .cols,.charts,.why-flow,.grid2{grid-template-columns:1fr}
+  .view{height:auto}.foot{position:static;margin-top:20px}
+  nav{display:none}
+}
+@media print{html,body{overflow:visible;height:auto;background:#fff}#stage{position:static;transform:none!important}
+  .slide{display:block;position:relative;page-break-after:always;box-shadow:none}nav{display:none}}
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ============ 第一章 · 改动 ============ -->
+<section class="slide on" id="p1" aria-label="第 1 页：加速 · 改动">
+  <div class="rule"></div>
+  <div class="kicker"><span class="ch">第一章 加速</span> · Evo-DexBench 评测 · 上游 PR #2（已合入）· 1 / 3 改动</div>
+  <h1>四个仿真环境改成轮流加载，用完的内存还给系统</h1>
+  <p class="lead">仿真和结果都不变，只改<b>加载的顺序</b>和<b>内存回收</b>。下图按实测数值画出一次评测开头的内存占用。</p>
+  <div class="cols">
+    <div class="view">
+      <svg viewBox="0 0 960 560" aria-label="内存随时间示意：原来四个环境同时加载，内存冲到 86 GiB 并一直不降；改后轮流加载，每次只冒一个尖，最后回落到 6 GiB">
+        <g font-family="Inter,Noto Sans SC,PingFang SC,sans-serif">
+        <!-- 坐标 -->
+        <text x="40" y="40" font-size="15" fill="#6F695F">内存（GiB）</text>
+        <line x1="90" y1="60" x2="90" y2="470" stroke="#CEC6B8"/>
+        <line x1="90" y1="470" x2="920" y2="470" stroke="#CEC6B8"/>
+        <g font-size="13" fill="#6F695F" text-anchor="end">
+          <text x="82" y="474">0</text><text x="82" y="379">20</text><text x="82" y="284">40</text><text x="82" y="189">60</text><text x="82" y="94">80</text>
+        </g>
+        <g stroke="#EFEAE2"><line x1="91" y1="375" x2="920" y2="375"/><line x1="91" y1="280" x2="920" y2="280"/><line x1="91" y1="185" x2="920" y2="185"/><line x1="91" y1="90" x2="920" y2="90"/></g>
+        <text x="920" y="500" font-size="14" fill="#6F695F" text-anchor="end">时间 →（加载约 2–3 分钟，之后评测 30 分钟以上）</text>
+        <g font-size="13" fill="#6F695F" text-anchor="middle"><text x="90" y="490">开始</text></g>
+        <!-- 原来：四块同时冲高并停在高位 -->
+        <path d="M90,470 L150,470 L230,60 L920,60 L920,470 Z" fill="#8A8376" opacity=".22"/>
+        <path d="M90,470 L150,470 L230,60 L920,60" fill="none" stroke="#8A8376" stroke-width="3"/>
+        <text x="560" y="50" font-size="18" font-weight="700" fill="#5E584D" text-anchor="middle">原来：4 个同时加载，冲到 86 GiB，之后一直不降</text>
+        <!-- 改后：四个尖依次出现，底部台阶慢慢上升到 6 GiB -->
+        <path d="M90,470 L250,470 L285,343 L320,466 L355,466 L390,339 L425,462 L460,462 L495,335 L530,458 L565,458 L600,343 L635,441 L920,441"
+              fill="none" stroke="#B0451E" stroke-width="3.5" stroke-linejoin="round"/>
+        <path d="M90,470 L250,470 L285,343 L320,466 L355,466 L390,339 L425,462 L460,462 L495,335 L530,458 L565,458 L600,343 L635,441 L920,441 L920,470 Z" fill="#B0451E" opacity=".14"/>
+        <g font-size="14" fill="#B0451E" text-anchor="middle" font-weight="600">
+          <text x="285" y="330">环境 1</text><text x="390" y="326">环境 2</text><text x="495" y="322">环境 3</text><text x="600" y="330">环境 4</text>
+        </g>
+        <text x="440" y="290" font-size="15" fill="#B0451E" text-anchor="middle">每次只有一个环境在加载：峰值约 27 GiB</text>
+        <text x="768" y="425" font-size="18" font-weight="700" fill="#B0451E" text-anchor="middle">改后：加载完回落到 6 GiB</text>
+        <!-- 双箭头：差距 -->
+        <line x1="905" y1="68" x2="905" y2="433" stroke="#1C1B18" stroke-width="1.5" marker-start="url(#a)" marker-end="url(#a)"/>
+        <defs><marker id="a" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1C1B18"/></marker></defs>
+        <rect x="812" y="230" width="86" height="44" rx="6" fill="#FFFFFF"/>
+        <text x="855" y="250" font-size="16" font-weight="700" fill="#1C1B18" text-anchor="middle">省 80 GiB</text>
+        <text x="855" y="268" font-size="13" fill="#6F695F" text-anchor="middle">约 1/14</text>
+        <text x="40" y="540" font-size="14" fill="#6F695F">示意，数值为实测：工作室场景任务（m01），一次评测的 4 个环境；曲线形状为简化</text>
+        </g>
+      </svg>
+    </div>
+    <div class="side">
+      <div class="step"><div class="n">1</div><div><b>问题</b>：一次评测开 4 个仿真环境，工作室场景要占 86 GiB，机器上限 96 GiB，只能一次跑一个。</div></div>
+      <div class="step"><div class="n">2</div><div><b>原因</b>：加载时仿真库每个环境临时开约 2700 个线程，4 个一起加载峰值叠加；用完的内存还被内存分配器攥着不还。</div></div>
+      <div class="step"><div class="n">3</div><div><b>改动</b>：4 个环境轮流加载；每次加载完，把空闲内存还给系统。</div></div>
+      <div class="key">
+        <div><span class="sw" style="background:var(--base)"></span>原来</div>
+        <div><span class="sw" style="background:var(--new)"></span>改后（轮流加载 + 归还内存）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第一章 · 结论 ============ -->
+<section class="slide" id="p2" aria-label="第 2 页：加速 · 结论">
+  <div class="rule"></div>
+  <div class="kicker"><span class="ch">第一章 加速</span> · 2 / 3 结论</div>
+  <h1>常驻内存降到原来的 1/6–1/14，原来只能单跑的任务现在能几个一起跑</h1>
+  <div class="answer"><b>有提升。</b>仿真结果逐位不变；代价是每次评测开头多等约 1 分钟。</div>
+  <div class="legend">
+    <span><i style="background:var(--base)"></i>原来</span>
+    <span><i style="background:var(--new)"></i>改后（轮流加载 + 归还内存）</span>
+  </div>
+  <div class="charts">
+    <div class="card" id="g1"><h3>加载完后一直占着的内存</h3><p class="q">一次评测的 4 个环境；机器上限 96 GiB · 越短越好</p></div>
+    <div class="card" id="g2"><h3>加载时的最高内存</h3><p class="q">一次评测的 4 个环境；机器上限 96 GiB · 越短越好</p></div>
+    <div class="card" id="g3"><h3>工作室场景能同时跑几个评测</h3><p class="q">一台 96 GiB 机器 · 越长越好</p></div>
+  </div>
+  <div class="why">
+    <div class="why-h">原因分析</div>
+    <div class="why-flow">
+      <div class="why-c"><span class="why-t">本意<small>已实测</small></span>仿真库加载场景时开很多线程并行准备渲染资源，图的是加载快。</div>
+      <div class="why-a">但</div>
+      <div class="why-c"><span class="why-t">内存叠加又不还<small>已实测</small></span>每个线程各用一块内存池，4 个环境同时加载就叠到 86 GiB；用完以后分配器留着不还。</div>
+      <div class="why-a">所以</div>
+      <div class="why-c"><span class="why-t">错开 + 归还</span>峰值一次只出现一个，空闲内存当场还掉。首次加载慢约 1.8 倍，但每次评测只发生一次。</div>
+    </div>
+  </div>
+  <div class="foot">内存：厨房场景（m04）、工作室场景（m01）各测 1 次。结果不变：m04 的观测、奖励等 124 项逐位相同，完整 100 回合每项记录相同。基线：上游改动前版本。另有两项 CPU / GPU 提速在测，未计入。</div>
+</section>
+
+<!-- ============ 第二章 · 基线 ============ -->
+<section class="slide" id="p3" aria-label="第 3 页：基线">
+  <div class="rule c2"></div>
+  <div class="kicker"><span class="ch c2">第二章 基线</span> · Kit 接入 Evo-DexBench · RoboScope-Kit PR #156（草稿）· 3 / 3 进度</div>
+  <h1>Kit 跑出的分数和原生评测对得上：已比 9 个任务，全部在误差内</h1>
+  <div class="answer c2"><b>目前一致。</b>30 个任务比完 9 个，成功率和阶段分的差距都在 2 个标准误以内。</div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Kit 减原生，差了几个标准误</h3>
+      <p class="q">每个任务 100 回合；点落在两条虚线之间就算一致 · 越靠近 0 越好</p>
+      <svg class="zsvg" id="zplot" viewBox="0 0 940 410" aria-label="9 个任务的成功率和阶段分差距，全部落在正负 2 个标准误之间"></svg>
+    </div>
+    <div class="card">
+      <h3>进度</h3>
+      <p class="q">30 个任务，每个原生、Kit 各跑一遍 · 越长越好</p>
+      <div class="pl"><b>已比完的任务</b></div>
+      <div class="prog"><i style="width:30%"></i><span>9 / 30</span></div>
+      <div class="pl"><b>超出误差的任务</b></div>
+      <div class="prog"><i style="width:0%"></i><span>0</span></div>
+      <div class="note">剩下 21 个任务暂停，机器先做提速测试。<br>按第一章的改动，剩余预计约 34 小时<span class="tag gold">估计</span>；加上在测的两项提速，可能降到 25–28 小时<span class="tag gold">待确认</span>。</div>
+    </div>
+  </div>
+  <div class="foot">每个任务原生、Kit 各 1 次，每次 100 回合，同一上游 DP-T 模型；误差 = 两者差值的标准误。原生重复 3 项（m02、m11、b11）未跑；双手任务只比完 1 个（b07）。</div>
+</section>
+
+</div>
+<nav><button type="button" id="prev" aria-label="上一页">←</button><span id="pg">1 / 3</span><button type="button" id="next" aria-label="下一页">→</button></nav>
+
+<script>
+(() => {
+"use strict";
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+function show(i) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, k) => { const on = k === cur; s.classList.toggle("on", on); s.toggleAttribute("inert", !on); s.setAttribute("aria-hidden", String(!on)); });
+  document.getElementById("pg").textContent = `${cur + 1} / ${slides.length}`;
+  history.replaceState(null, "", "#" + (cur + 1));
+}
+function fit() {
+  const s = Math.min(innerWidth / 1600, innerHeight / 900) * 0.96;
+  document.getElementById("stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+document.getElementById("prev").onclick = () => show(cur - 1);
+document.getElementById("next").onclick = () => show(cur + 1);
+addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("input,textarea")) return;
+  if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(cur + 1); }
+  if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(cur - 1); }
+  if (e.key === "Home") show(0);
+  if (e.key === "End") show(slides.length - 1);
+});
+addEventListener("resize", fit);
+addEventListener("hashchange", () => show((parseInt(location.hash.slice(1)) || 1) - 1));
+
+// ---------- 第 2 页条形图 ----------
+const COL = { b: "var(--base)", n: "var(--new)" };
+const NAME = { b: "原来", n: "改后" };
+function bars(id, groups, max, fmt, veto, vlabel) {
+  const el = document.getElementById(id);
+  for (const [title, rows] of groups) {
+    if (title) el.insertAdjacentHTML("beforeend", `<div class="grp">${title}</div>`);
+    for (const [k, v] of rows) {
+      const r = document.createElement("div"); r.className = "row";
+      r.innerHTML = `<div class="lab">${NAME[k]}</div><div class="track"></div>`;
+      const t = r.lastChild, w = v / max * 66;
+      t.innerHTML = `<div class="bar" title="${NAME[k]}：${fmt(v)}" style="width:${w}%;background:${COL[k]}"></div><span class="val" style="left:calc(${w}% + 8px)">${fmt(v)}</span>`;
+      if (veto != null) t.insertAdjacentHTML("beforeend", `<div class="veto" style="left:${veto / max * 66}%"></div>`);
+      el.appendChild(r);
+    }
+  }
+  if (veto != null) el.insertAdjacentHTML("beforeend", `<p class="vnote">红虚线：${vlabel}</p>`);
+}
+const gib = v => v.toFixed(1) + " GiB";
+bars("g1", [["厨房场景", [["b", 36.2], ["n", 5.7]]], ["工作室场景", [["b", 86.4], ["n", 6.1]]]], 100, gib);
+bars("g2", [["厨房场景", [["b", 36.1], ["n", 13.3]]], ["工作室场景", [["b", 86.4], ["n", 26.7]]]], 100, gib);
+bars("g3", [["", [["b", 1], ["n", 4]]]], 5, v => v + " 个");
+document.getElementById("g3").insertAdjacentHTML("beforeend",
+  '<p class="vnote" style="color:var(--muted)">改后实测 4 个评测同时跑（其中 2 个是工作室场景）；再多受显卡显存限制，不是内存</p>');
+
+// ---------- 第 3 页：z 值点图 ----------
+const Z = [["m01", -1.20, -1.60], ["m02", -0.44, -0.71], ["m04", 0.28, 0.28], ["m06", 0.91, 0.64], ["m08", -0.64, -0.26],
+           ["m09", -0.42, -0.13], ["m10", -0.93, -0.55], ["m11", 0.00, 0.41], ["b07", -1.00, -0.28]];
+const sv = document.getElementById("zplot"), NS = "http://www.w3.org/2000/svg";
+const el = (tag, a, txt) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; sv.appendChild(e); return e; };
+const X0 = 70, X1 = 920, Y = z => 190 - z * 72;   // ±2 → 46 / 334
+el("rect", { x: X0, y: Y(2), width: X1 - X0, height: Y(-2) - Y(2), fill: "#DDEEEA", opacity: .55 });
+for (const z of [2, -2]) el("line", { x1: X0, x2: X1, y1: Y(z), y2: Y(z), stroke: "#14706A", "stroke-width": 2, "stroke-dasharray": "8 6" });
+el("line", { x1: X0, x2: X1, y1: Y(0), y2: Y(0), stroke: "#CEC6B8" });
+for (const z of [-2, -1, 0, 1, 2]) el("text", { x: X0 - 10, y: Y(z) + 5, "font-size": 14, fill: "#6F695F", "text-anchor": "end" }, (z > 0 ? "+" : "") + z);
+el("text", { x: X1, y: Y(2) - 8, "font-size": 14, fill: "#14706A", "text-anchor": "end" }, "+2 个标准误：Kit 偏高的界限");
+el("text", { x: X1, y: Y(-2) - 8, "font-size": 14, fill: "#14706A", "text-anchor": "end" }, "−2 个标准误：Kit 偏低的界限");
+const step = (X1 - X0) / Z.length;
+Z.forEach(([t, sr, ss], i) => {
+  const x = X0 + step * (i + .5);
+  el("text", { x, y: 372, "font-size": 15, fill: "#3B3832", "text-anchor": "middle", "font-family": "JetBrains Mono,Consolas,monospace" }, t);
+  el("circle", { cx: x - 9, cy: Y(sr), r: 8, fill: "#B0451E" }).appendChild(document.createElementNS(NS, "title")).textContent = `${t} 成功率 ${sr}`;
+  el("rect", { x: x + 2, y: Y(ss) - 7, width: 14, height: 14, rx: 2, fill: "#3B4C9E" }).appendChild(document.createElementNS(NS, "title")).textContent = `${t} 阶段分 ${ss}`;
+});
+el("circle", { cx: X0 + 10, cy: 398, r: 7, fill: "#B0451E" }); el("text", { x: X0 + 24, y: 403, "font-size": 15, fill: "#3B3832" }, "成功率");
+el("rect", { x: X0 + 104, y: 391, width: 14, height: 14, rx: 2, fill: "#3B4C9E" }); el("text", { x: X0 + 126, y: 403, "font-size": 15, fill: "#3B3832" }, "阶段分（完成到第几步）");
+el("text", { x: X0 + 340, y: 403, "font-size": 15, fill: "#6F695F" }, "m = 单手任务，b = 双手任务");
+
+fit();
+show((parseInt(location.hash.slice(1)) || 1) - 1);
+})();
+</script>
+</body>
+</html>
