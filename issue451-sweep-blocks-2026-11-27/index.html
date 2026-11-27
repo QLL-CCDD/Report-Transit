@@ -18,4 +18,11 @@ h1,h2{font-weight:600}video{width:100%;border:1px solid #ddd;background:#000}.g{
 <tr><td>第 1 次：刷子等在离方块更近的位置</td><td>37/54 69%</td><td>16 越界</td><td>947</td></tr>
 <tr><td>第 2 次：方块离底座最小距离 0.22→0.28 m，先抬后倾</td><td>39/54 72%</td><td>8 越界 + 7 超时</td><td>1118</td></tr></table>
 <p>一句话说明主要问题：刷子又长，手腕关节又容易顶到极限，扫的时候不是扫进底座周围的禁区，就是卡住不动；每块方块单独往返一趟，整体也太慢。目前标为“待人工”，下一步需要用户决定。</p>
+<h2>修复尝试后剩下的失败（2026-11-27 晚，第 3 轮最好版本）</h2>
+<p class="n">录制条件：第 3 轮最好的那版专家（卡住检测 + 靠近底座时外推，不用前瞻选块），节点 f，scout 32 回合（种子 100003），28 个有效起点。scout 不判越界，越界的回合会继续演到结束；字幕里写的是 Home 验证在哪一步判越界。越界按 Home 的同一条规则（包围盒离底座轴 ≥ 0.15 m、x ≥ 0）从轨迹算出。</p>
+<div class="g">
+<div class="c"><p>失败①（主因）env 5：空中移刷越过底座线。目标是离底座近、偏在一侧的方块，刷子斜着绕到它后面，第 201 步包围盒离底座轴 0.149 m</p><video controls loop muted src="failures/fail1-travel-exit-env5.mp4"></video></div>
+<div class="c"><p>失败② env 12：J4 顶在上限 1.553 rad，第 106 步起一直贴着，手几乎不动，3 块都没推，耗到超时</p><video controls loop muted src="failures/fail2-j4-pinned-env12.mp4"></video></div>
+<div class="c"><p>失败③ env 21：起点刷子就已压线（0.143 m），Home 在第 0 步判越界；这是起点摆放问题</p><video controls loop muted src="failures/fail3-start-inside-env21.mp4"></video></div>
+<div class="c"><p>附 env 0：推得慢的超时。方块都在走，1350 步内没全部送进去（p95 超线的来源）</p><video controls loop muted src="failures/extra-slow-timeout-env0.mp4"></video></div></div>
 </body></html>
