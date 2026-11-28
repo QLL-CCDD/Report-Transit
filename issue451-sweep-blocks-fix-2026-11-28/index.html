@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>扫方块（a2r #451）专家重构与 T12/v3 验收 2026-11-28</title>
+<style>body{font-family:Georgia,"Noto Serif SC",serif;background:#faf8f3;color:#222;max-width:1100px;margin:2em auto;padding:0 1em;line-height:1.6}
+h1,h2{font-weight:600}video{width:100%;border:1px solid #ddd;background:#000}.g{display:grid;grid-template-columns:1fr 1fr;gap:1.2em}
+.c p{margin:.3em 0 .1em}table{border-collapse:collapse;margin:.8em 0}td,th{border:1px solid #ccc;padding:.35em .7em}.n{color:#666;font-size:.92em}.pass{color:#1b6e35;font-weight:600}</style></head><body>
+<h1>扫方块 <code>place/sweep_blocks</code>：专家重构与验收结果（a2r #451）</h1>
+<p>分支 <code>e10/sweep-blocks-fix-v2</code>（提交 <code>0fe025a83</code>，未改冻结字段，<code>frozen_hash</code> 与 <code>09fbbd570</code> 逐位一致）。不改方块数、不放宽 900 步验收线，通过 <code>SweepObjects</code> 专家重构同时解决越界、手腕限位、倒退压盘和 v3 续接缺失四类问题。</p>
+<h2>Home 专家验收（T12 门禁：成功 ≥ 90%，未完成 ≤ 5%，p95 ≤ 900 步）</h2>
+<table>
+<tr><th>版本 / 种子</th><th>可行 Home</th><th>成功</th><th>越界 / 失败</th><th>超时</th><th>成功 p95</th><th>判定</th></tr>
+<tr><td>基线（<code>09fbbd570</code>，seed 1，1 轮）</td><td>54</td><td>40 (74.1%)</td><td>7 (13.0%)</td><td>7 (13.0%)</td><td>924 步</td><td>fail</td></tr>
+<tr><td>修复版（<code>0fe025a83</code>，seed 1，3 轮 / 192 提案）</td><td>162</td><td><b>160 (98.8%)</b></td><td><b>0 (0.0%)</b></td><td>2 (1.2%)</td><td><b>874 步</b> (29.1 s)</td><td class="pass">pass</td></tr>
+<tr><td>修复版（<code>0fe025a83</code>，独立 seed 71，3 轮 / 192 提案）</td><td>170</td><td><b>166 (97.6%)</b></td><td><b>0 (0.0%)</b></td><td>4 (2.4%)</td><td><b>872 步</b> (29.1 s)</td><td class="pass">pass</td></tr>
+<tr><td><b>两组独立种子合计（6 轮 / 384 提案）</b></td><td><b>332</b></td><td><b>326 (98.2%)</b></td><td><b>0 (0.0%)</b></td><td><b>6 (1.8%)</b></td><td><b>872–874 步</b></td><td class="pass">pass</td></tr>
+</table>
+<h2>v3 起点库续接验证（<code>full_sources → full_build → check</code>）</h2>
+<p>已在 <code>full_trajectory_state.py</code> 注册 <code>SweepObjects</code> 并在插件声明全部 10 个内部状态键（<code>state_keys</code>）。在 <code>gpu-a</code> 实测：<code>full_sources</code> 采集 25/26 完整轨迹；<code>full_build</code> 生成 320 条覆盖 10 个十分位组的 v3 起点库；<code>check --policies expert</code> 在全部 8 个阶段（<code>pregrasp / pick_descend / pick_close / pick_lift / grasped_far / p25 / p50 / p75</code>）达到 <b>32/32（100%）</b>续接成功、<code>veto_on_success=0</code>。</p>
+<h2>原失败案例对照视频（与 11-27 同一 <code>scout --num_envs 16 --seed 1</code>：13/16 → 16/16 全部成功）</h2>
+<p class="n">以下 4 段均从与 11-27 相同的 pregrasp seed 1 轨迹渲染（1x 实速）。原先超时的 env 8、env 9、env 10 全部在 332–536 步干净扫完，无伸到方块前方、无压盘、无手腕贴限。</p>
+<div class="g">
+<div class="c"><p><b>env 8（原 1350 步超时压盘）→ 332 步成功（11.1 s）</b>：一趟连推三块到簸箕口，再沿漏斗口斜扫 22° 将边缘块带入盘内</p><video controls loop muted src="videos/env8.mp4"></video></div>
+<div class="c"><p><b>env 9（原 1350 步手腕扭限剩 3 块）→ 355 步成功（11.8 s）</b>：关节空间回正至居中准备姿态，全程远离 J4/J5 限位</p><video controls loop muted src="videos/env9.mp4"></video></div>
+<div class="c"><p><b>env 10（原 1350 步悬停不推）→ 536 步成功（17.9 s）</b>：多块合推 + 盘口贴边方块微拨进盘</p><video controls loop muted src="videos/env10.mp4"></video></div>
+<div class="c"><p><b>env 5（16 回合中最慢的一例）→ 721 步成功（24.0 s）</b>：原最慢 775 步，全部 16 回合均在 238–721 步内完成</p><video controls loop muted src="videos/env5.mp4"></video></div>
+</div>
+</body></html>
